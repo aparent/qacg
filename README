@@ -1,0 +1,5 @@
+QACG stands for: Quantum Arithmetic Circuit Generator.
+
+Currently it is a collection of Haskell modules that generate various circuits. 
+When finished it should provide a command line utility from which various circuits 
+can be requested by providing a name and parameters 

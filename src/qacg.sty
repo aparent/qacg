@@ -1,0 +1,96 @@
+\ProvidesPackage{qacg}
+% (c) Andrew Cooke 2001
+% Released under the GPL - see http://www.gnu.org
+%
+% This file is a simple Latex style file that, together with the
+% listings package (and the geometry, titlesec and graphicx packages if
+% you include the code below that sets up a particular page style),
+% supports mixing Latex and Haskell.
+% 
+% These packages are present on my machine as part of tetex (which is
+% provided by the Debian/testing distribution).
+% 
+% Haskell already supports a literate programming style.  If you put
+% Haskell code into a file that ends in ``.lhs'' then the contents will
+% be ignored except for anything between \begin{code} and \end{code}.
+% 
+% All that I do below is add the glue to make this invoke the
+% appropriate actions in the listings package when Latex processes the
+% file.  This takes the code inside the code block and formats it
+% nicely.
+% 
+% For examples, see http://www.andrewcooke.free-online.co.uk/jara/pancito
+
+
+% This stops warning from listings when used in article mode - you don't
+% want it if you are not using teh article style
+\newcounter{chapter}
+
+% Load the package that does the real work
+\usepackage{listings}
+\lstloadlanguages{Haskell}
+
+% Connect the code blocks to listins - this is the important bit!
+\lstnewenvironment{code}
+    {\lstset{}%
+     \csname lst@SetFirstLabel\endcsname}
+    {\csname lst@SaveFirstLabel\endcsname}
+
+% The next chunk of code customizes the code appearance.  See the
+% listings package documentation for full details.
+\lstset{
+%  basicstyle=\small, % swap this and the following line for prop. font
+  basicstyle=\small\ttfamily,
+%  keywordstyle=\underbar, % these look ugly
+%  identifierstyle=\slshape,
+%  commentstyle=\underbar
+  flexiblecolumns=false,
+  basewidth={0.5em,0.45em},
+  % The following replace compound charcters like ->
+  % Something is missing - someone kindly sent me an email which 
+  % I've lost - but it's obvious how to add more.
+  literate={+}{{$+$}}1 {/}{{$/$}}1 {*}{{$*$}}1 {=}{{$=$}}1
+               {>}{{$>$}}1 {<}{{$<$}}1 {\\}{{$\lambda$}}1
+               {\\\\}{{\char`\\\char`\\}}1
+               {->}{{$\rightarrow$}}2 {>=}{{$\geq$}}2 {<-}{{$\leftarrow$}}2
+               {<=}{{$\leq$}}2 {=>}{{$\Rightarrow$}}2 
+               {\ .}{{$\circ$}}2 {\ .\ }{{$\circ$}}2
+               {>>}{{>>}}2 {>>=}{{>>=}}2
+               {|}{{$\mid$}}1
+} 
+
+% From here down it's just arranging things on the page how I like them
+% - nothing to do with formatting code etc.
+
+% Page size
+\usepackage[hmargin={6cm,3cm},vmargin={3cm,3cm},offset=0pt,nohead]{geometry}
+
+% Titles, layout etc
+\usepackage{titlesec}
+
+\titleformat{\part}[frame]
+{\normalfont}
+{\filright\footnotesize\enspace Andrew Cooke \enspace}
+{8pt}
+{\Large\bfseries\sffamily\filcenter}
+\titlespacing{\part}
+{-3cm}{-0.5cm}{5ex}
+
+\titleformat{\section}[leftmargin]
+{\large\bfseries\sffamily\filleft}
+{}{0pt}{}
+\titlespacing{\section}
+{3cm}{2.5ex plus .1ex minus .2ex}{1pc}
+
+\titleformat{\subsection}[leftmargin]
+{\normalfont\bfseries\sffamily\filleft}
+{}{0pt}{}
+\titlespacing{\subsection}
+{3cm}{1.5ex plus .1ex minus .2ex}{1pc}
+
+\setlength{\parindent 0pt}
+\setlength{\parskip 1.5ex plus 0.5ex minus 0.2ex}
+
+% Support eps images
+\usepackage{graphicx}
+
