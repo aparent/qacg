@@ -1,0 +1,3 @@
+-Current circuit is not correct (missing some cleanup at the end)
+-more time vs space tradeoffs
+-additional calls to karasuba are needed to cleanup.  How does this effect it's runtime?
