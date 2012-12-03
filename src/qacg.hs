@@ -2,6 +2,7 @@ import System.Environment
 import System.Directory
 
 import CircGen.Mult.SimpleMultAlt
+import CircGen.Mult.Karatsubanew
 import CircGen.Mult.SimpleMult
 import CircGen.Mult.Wallace
 import CircGen.Mult.PartialProduct
@@ -20,6 +21,7 @@ main = do
   writeCircuit dir "SimpleMultAlt.qc" $ simpleMultAlt n
   writeCircuit dir "wallace.qc" $ wallaceMult n
   writeCircuit dir "partialProduct.qc" $ partialProduct n
+  writeCircuit dir "kara.qc" $ karatsuba n 8
 
 writeCircuit :: String -> String -> Circuit -> IO()
 writeCircuit dir fname circ = writeFile (dir ++ fname) (show circ)
