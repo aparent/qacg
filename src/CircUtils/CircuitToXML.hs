@@ -1,28 +1,33 @@
 import Text.XML.HXT.Core
 import CircUtils.Circuit
 import CircGen.Add.SimpleRipple
+import CircGen.Mult.SimpleMultAlt
 import Data.List
 
 main :: IO ()
 main
     = do
       --[src, dst] <- getArgs
-      runX ( circToXML "ripple" (simpleRipple 5) )
+      runX ( circToXML "ripple" (simpleRipple 4) )
+      runX ( circToXML "mult" (simpleMultAlt 4) )
       return() 
 
 circToXML :: String -> Circuit -> IOSArrow XmlTree XmlTree
-circToXML pName circ = root [] [makeXMLCirc pName circ]                    
+circToXML pName circ = root [] [makeXMLProg pName circ]                    
             >>>
             writeDocument [withIndent yes] (pName ++ ".xml")
 
-makeXMLCirc  :: ArrowXml a => String -> Circuit -> a XmlTree XmlTree
-makeXMLCirc procName Circuit{lineInfo = l , gates=g, subcircuits=s}
-    = program $ [ proceedure $ map mkGate g ]
-    where program a = mkelem "program" [ sattr "xmlns" "http://torque.bbn.com/ns/QuIGL",
+makeXMLProg  :: ArrowXml a => String -> Circuit -> a XmlTree XmlTree
+makeXMLProg cname c = program $  (makeXMLCirc cname c) : map (\(c,n) -> makeXMLCirc n c) (subcircuits c) 
+  where program a = mkelem "program" [ sattr "xmlns" "http://torque.bbn.com/ns/QuIGL",
                                          sattr "xmlns:xsi" "http://www.w3.org/2001/XMLSchema-instance", 
                                          sattr "xsi:schemaLocation" "http://torque.bbn.com/ns/QuIGL ../xsd/QuIGL.xsd"] 
                                          a 
-          proceedure a =  mkelem "procedure" [ sattr "name" procName,
+     
+makeXMLCirc  :: ArrowXml a => String -> Circuit -> a XmlTree XmlTree
+makeXMLCirc procName Circuit{lineInfo = l , gates=g, subcircuits=s}
+    = proceedure $ map mkGate g 
+    where proceedure a =  mkelem "procedure" [ sattr "name" procName,
                                          sattr "static" "", 
                                          sattr "quantum" lines] 
                                          [mkelem "body" [] a ]
