@@ -1,6 +1,8 @@
 module CircGen.Add.SimpleRipple
 ( simpleRipple
  ,simpleRippleCtrl
+ ,applySimpleRipple
+ ,applySimpleRippleCtrl
 ) where
 
 import CircUtils.Circuit
@@ -11,6 +13,21 @@ simpleRipple a = Circuit (adderLines a) (adderGates a) []
 
 simpleRippleCtrl :: Int -> Circuit
 simpleRippleCtrl a = Circuit (adderLinesCtrl a) (adderGatesCtrl a) []
+
+applySimpleRipple :: [String] -> [String] -> String -> String -> [Gate]
+applySimpleRipple a b z c = go (c:a) b 
+  where go (a:[]) [] = [Gate "tof" [a,z]]
+        go (a0:a1:as) (b0:bs) = maj a0 b0 a1 ++ go (a1:as) bs ++ uma a0 b0 a1  
+        maj x y z  = [Gate "tof" [z,y], Gate "tof" [z,x],Gate "tof" [x,y,z]]
+        uma x y z  = [Gate "tof" [x,y,z], Gate "tof" [z,x],Gate "tof" [x,y]]
+
+applySimpleRippleCtrl :: String -> [String] -> [String] -> String -> String -> [Gate]
+applySimpleRippleCtrl ctrl a b z c = go (c:a) b 
+  where go (a:[]) [] = [Gate "tof" [ctrl,a,z]]
+        go (a0:a1:as) (b0:bs) = maj a0 b0 a1 ++ go (a1:as) bs ++ uma a0 b0 a1  
+        maj x y z  = [Gate "tof" [ctrl,z,y], Gate "tof" [z,x],Gate "tof" [x,y,z]]
+        uma x y z  = [Gate "tof" [x,y,z], Gate "tof" [z,x],Gate "tof" [ctrl,x,y]]
+
 
 adderLines :: Int -> LineInfo 
 adderLines a = LineInfo vars inputs outputs outputLab
@@ -26,15 +43,11 @@ adderLinesCtrl n = LineInfo ("ctrl":v) ("ctrl":i) ("ctrl":o) ("ctrl":ol)
   where (LineInfo v i o ol) = adderLines n
 
 adderGatesCtrl :: Int -> [Gate]
-adderGatesCtrl a = maj "c" "b0" "a0" ++ left (a-2)++ [Gate "tof" ["ctrl",'a':show(a-1),"z"]] ++ right (a-2) ++ uma "c" "b0" "a0"
- where left n   = concatMap (\x -> maj ('a':show x) ('b':show (x+1)) ('a':show (x+1))) [0..n]
-       right n  = concatMap (\x -> uma ('a':show x) ('b':show (x+1)) ('a':show (x+1))) $ reverse [0..n]
-       maj a b c  = [Gate "tof" ["ctrl",c,b], Gate "tof" [c,a],Gate "tof" [a,b,c]]
-       uma a b c  = [Gate "tof" [a,b,c], Gate "tof" [c,a],Gate "tof" ["ctrl",a,b]]
+adderGatesCtrl n = applySimpleRippleCtrl "ctrl" a b "z" "c"
+	where a = map (\x -> 'a':show x) [0..(n-1)]
+	      b = map (\x -> 'b':show x) [0..(n-1)]
 
 adderGates :: Int -> [Gate]
-adderGates a = maj "c" "b0" "a0" ++ left (a-2)++ [Gate "tof" ['a':show(a-1),"z"]] ++ right (a-2) ++ uma "c" "b0" "a0"
- where left n   = concatMap (\x -> maj ('a':show x) ('b':show (x+1)) ('a':show (x+1))) [0..n]
-       right n  = concatMap (\x -> uma ('a':show x) ('b':show (x+1)) ('a':show (x+1))) $ reverse [0..n]
-       maj a b c  = [Gate "tof" [c,b], Gate "tof" [c,a],Gate "tof" [a,b,c]]
-       uma a b c  = [Gate "tof" [a,b,c], Gate "tof" [c,a],Gate "tof" [a,b]]
+adderGates n = applySimpleRipple a b "z" "c"
+	where a = map (\x -> 'a':show x) [0..(n-1)]
+	      b = map (\x -> 'b':show x) [0..(n-1)]

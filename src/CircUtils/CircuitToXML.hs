@@ -9,7 +9,7 @@ main
     = do
       --[src, dst] <- getArgs
       runX ( circToXML "ripple" (simpleRipple 4) )
-      runX ( circToXML "mult" (simpleMultAlt 4) )
+      runX ( circToXML "mult" (simpleMultAlt 5) )
       return() 
 
 circToXML :: String -> Circuit -> IOSArrow XmlTree XmlTree
