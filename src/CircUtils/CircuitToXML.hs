@@ -1,3 +1,8 @@
+
+module CircUtils.CircuitToXML( 
+  circToXML 
+) where
+
 import Text.XML.HXT.Core
 import CircUtils.Circuit
 import CircGen.Add.SimpleRipple
@@ -31,13 +36,13 @@ makeXMLCirc procName Circuit{lineInfo = l , gates=g, subcircuits=s}
                                          sattr "static" "", 
                                          sattr "quantum" lines] 
                                          [mkelem "body" [] a ]
-          mkGate Gate{name = gname, lineNames = lnames} = mkelem "control" [] $ (map (\x -> mkelem "control"[][ mkelem "variable" [][ txt x ]]) (tail $ reverse lnames)) ++ [
-                                                            mkelem "body" [][
-                                                              mkelem "statement" [][
-                                                                mkelem "operator"[][txt gname], 
-                                                                mkelem "arguments"[][ 
-                                                                  mkelem "variable" [][
-                                                                    txt (head$reverse lnames)
+          mkGate g = mkelem "control" [] $ (map (\x -> selem "control"[ selem "variable" [ txt x ]]) (tail$reverse$lineNames g)) ++ [
+                                                            selem "body" [
+                                                              selem "statement" [
+                                                                selem "operator" [txt$name g], 
+                                                                selem "arguments" [ 
+                                                                  selem "variable" [
+                                                                    txt (head$reverse$lineNames g)
                                                          ]]]]]
           lines = concat $ intersperse "," $ vars l  
           

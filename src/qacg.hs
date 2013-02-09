@@ -8,20 +8,29 @@ import CircGen.Mult.Wallace
 import CircGen.Mult.PartialProduct
 import CircGen.Add.SimpleRipple
 import CircUtils.Circuit
+import CircUtils.CircuitToXML
+import Text.XML.HXT.Core
 
 main :: IO()
 main = do 
-  args <- getArgs
-  n    <- return $ read $ head args
-  dir  <- return $ "ExamplesSize-" ++ show n ++ "/"
+  args   <- getArgs
+  n      <- return $ read $ head args
+  dir    <- return $ "ExamplesSize-" ++ show n ++ "/"
+  qcdir  <- return $ dir ++ "qc/"
+  xmldir <- return $ dir ++ "xml/"
   createDirectoryIfMissing False dir
-  writeCircuit dir "SimpleRipple.qc"  $ simpleRipple n
-  writeCircuit dir "SimpleRippleCtrl.qc"  $ simpleRippleCtrl n
-  writeCircuit dir "SimpleMult.qc"  $ simpleMult n
-  writeCircuit dir "SimpleMultAlt.qc" $ simpleMultAlt n
-  writeCircuit dir "wallace.qc" $ wallaceMult n
-  writeCircuit dir "partialProduct.qc" $ partialProduct n
-  writeCircuit dir "kara.qc" $ karatsuba n 8
+  createDirectoryIfMissing False qcdir
+  createDirectoryIfMissing False xmldir
+  writeCircuit qcdir xmldir "SimpleRipple"  $ simpleRipple n
+  writeCircuit qcdir xmldir "SimpleRippleCtrl"  $ simpleRippleCtrl n
+  writeCircuit qcdir xmldir "SimpleMult"  $ simpleMult n
+  writeCircuit qcdir xmldir "SimpleMultAlt" $ simpleMultAlt n
+  writeCircuit qcdir xmldir "wallace" $ wallaceMult n
+  writeCircuit qcdir xmldir "partialProduct" $ partialProduct n
+  writeCircuit qcdir xmldir "kara" $ karatsuba n 8
 
-writeCircuit :: String -> String -> Circuit -> IO()
-writeCircuit dir fname circ = writeFile (dir ++ fname) (show circ)
+writeCircuit :: String-> String -> String -> Circuit -> IO()
+writeCircuit qcdir xmldir fname circ = do 
+  writeFile (qcdir ++ fname++".qc") (show circ)
+  _ <- runX ( circToXML (xmldir++fname) circ )
+  return() 
