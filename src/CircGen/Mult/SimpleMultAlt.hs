@@ -12,9 +12,9 @@ simpleMultAlt n = Circuit (multLines n) (multGates n) []
 
 applySimpleMultAlt :: [String] -> [String] -> [String] -> String -> [Gate]
 applySimpleMultAlt a b r c = start ++ go (tail a) (tail r) 
-  where start = zipWith (\x y -> Gate "tof" [(head a),x,y]) b r
+  where start = zipWith (\x y -> Gate "tof" [head a,x,y]) b r
         go [] _ = [] 
-        go (x:xs) res = (applySimpleRippleCtrl x b (take (length b) res) (res !! (length b)) c) ++ (go xs $ tail res)
+        go (x:xs) res = applySimpleRippleCtrl x b (take (length b) res) (res !! length b) c ++ go xs (tail res)
 
 multGates :: Int -> [Gate]
 multGates n = applySimpleMultAlt a b res "c"

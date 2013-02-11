@@ -13,16 +13,16 @@ circToXML pName circ = root [] [makeXMLProg pName circ]
             writeDocument [withIndent yes] (pName ++ ".xml")
 
 makeXMLProg  :: ArrowXml a => String -> Circuit -> a XmlTree XmlTree
-makeXMLProg cname c = program $  (makeXMLCirc cname c) : map (\(x,y) -> makeXMLCirc y x) (subcircuits c) 
-  where program a = mkelem "program" [ 
-                        sattr "xmlns" "http://torque.bbn.com/ns/QuIGL",
-                        sattr "xmlns:xsi" "http://www.w3.org/2001/XMLSchema-instance", 
-                        sattr "xsi:schemaLocation" "http://torque.bbn.com/ns/QuIGL ../xsd/QuIGL.xsd"
-                    ] a 
+makeXMLProg cname c = program $ makeXMLCirc cname c : map (\(x,y) -> makeXMLCirc y x) (subcircuits c) 
+  where program = mkelem "program" [ 
+                    sattr "xmlns" "http://torque.bbn.com/ns/QuIGL",
+                    sattr "xmlns:xsi" "http://www.w3.org/2001/XMLSchema-instance", 
+                    sattr "xsi:schemaLocation" "http://torque.bbn.com/ns/QuIGL ../xsd/QuIGL.xsd"
+                 ] 
      
 makeXMLCirc  :: ArrowXml a => String -> Circuit -> a XmlTree XmlTree
 makeXMLCirc procName circ = proceedure $ map mkGate $ gates circ
-    where qVars = concat $ intersperse "," $ vars $ lineInfo circ  
+    where qVars = intercalate "," $ vars $ lineInfo circ  
           proceedure a =  mkelem "procedure" [ 
                               sattr "name" procName,
                               sattr "static" "", 

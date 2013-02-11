@@ -7,7 +7,7 @@ import CircUtils.Circuit
 
 contShift :: Int -> Circuit 
 contShift n = Circuit shiftLines (applyContShift "ctrl" $ tail slines) []
-  where slines ="ctrl" : (map (\x -> "x" ++ show x) [0..(n-1)])
+  where slines ="ctrl" : map (\x -> 'x':show x) [0..(n-1)]
         shiftLines = LineInfo slines slines slines slines
 
 
