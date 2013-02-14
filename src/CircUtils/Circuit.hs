@@ -5,6 +5,8 @@ module CircUtils.Circuit
   ,writeQc
 ) where
 
+import Data.List
+
 data Circuit = Circuit{   lineInfo :: LineInfo	      
 			, gates :: [Gate]
 			, subcircuits :: [(Circuit,String)]
@@ -40,7 +42,7 @@ writeSubcircuits :: [(Circuit,String)] -> String
 writeSubcircuits = concatMap writeSubcircuit 
 
 writeSubcircuit :: (Circuit,String) -> String
-writeSubcircuit (c,n) =  "\nBEGIN "++ n ++"( "++writeVars (vars $ lineInfo c) ++")\n" ++ writeGates (gates c) ++ "END " ++ n ++ "\n" 
+writeSubcircuit (c,n) =  "\nBEGIN "++ n ++"("++writeVars (vars $ lineInfo c) ++")\n" ++ writeGates (gates c) ++ "END " ++ n ++ "\n" 
                           ++ concatMap writeSubcircuit (subcircuits c)
 
 writeLineInfo :: LineInfo -> String
@@ -48,7 +50,7 @@ writeLineInfo LineInfo{vars=v,inputs=i,outputs=o,outputLabels = ol} =
 	".v " ++ writeVars v ++ "\n.i "++ writeVars i ++ "\n.o " ++ writeVars o ++ "\n.ol " ++ writeVars ol ++ "\n"
 	
 writeVars :: [String] -> String
-writeVars = concatMap (\x -> ' ':x) 
+writeVars = intercalate " "
 
 writeGates :: [Gate] -> String
 writeGates = concatMap writeGate 
