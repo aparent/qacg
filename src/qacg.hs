@@ -12,9 +12,9 @@ main = do
   cName  <- return $ head args
   size   <- return $ read $ head $ tail args
   case cName of
-    "adder"     ->  writeCircuit "SimpleRipple" $ simpleRipple size
-    "adderCtrl" ->  writeCircuit "SimpleRippleCtrl"  $ simpleRippleCtrl size
-    "multiplier" -> writeCircuit "SimpleMult" $ simpleMultAlt size
+    "adder"     ->  writeCircuit "adder" $ simpleRipple size
+    "adderCtrl" ->  writeCircuit "adderCtrl"  $ simpleRippleCtrl size
+    "multiplier" -> writeCircuit "multiplier" $ simpleMultAlt size
     _ -> putStrLn $ "No generator for " ++ cName
 
 writeCircuit :: String-> Circuit -> IO()

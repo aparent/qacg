@@ -49,8 +49,7 @@ simpleRipple a b = do
   applyRipple ((cs!!0):a) b (cs!!1)
   freeConst [cs!!0]
   return (a, b ++ [(cs!!1)])
-    where applyRipple (a:[]) [] z 
-            = do tof [a,z] 
+    where applyRipple (a:[]) [] z = tof [a,z] 
           applyRipple (a0:a1:as) (b0:bs) z
             = do maj a0 b0 a1 
                  applyRipple (a1:as) bs z
@@ -67,11 +66,10 @@ simpleRipple a b = do
 simpleCtrlRipple :: String -> [String] -> [String] -> String -> CircuitState ([String], [String])
 simpleCtrlRipple ctrl a b carry = do 
   cs <- getConst 1
-  applyRipple ((cs!!0):a) b carry
-  freeConst [cs!!0]
-  return (a, b ++ [(cs!!1)])
-    where applyRipple (a:[]) [] z 
-            = do tof [a,z] 
+  applyRipple (head cs:a) b carry
+  freeConst [head cs]
+  return (a, b ++ [cs!!1])
+    where applyRipple (a:[]) [] z = tof [a,z] 
           applyRipple (a0:a1:as) (b0:bs) z
             = do maj a0 b0 a1 
                  applyRipple (a1:as) bs z
@@ -87,7 +85,7 @@ simpleCtrlRipple ctrl a b carry = do
 
 mkSimpleMult :: [String] -> [String] -> Circuit
 mkSimpleMult aLns bLns = circ
-  where (_,(_,_,circ)) = runState go $ ([],(map (\x->'c':show x) [0..2*(length aLns + 1)]),Circuit (LineInfo [] [] [] []) [] [])
+  where (_,(_,_,circ)) = runState go ([],map (\x->'c':show x) [0..2*(length aLns + 1)],Circuit (LineInfo [] [] [] []) [] [])
         go             = do a <- initLines aLns
                             b <- initLines bLns
                             mOut <- simpleMult a b  
@@ -96,7 +94,7 @@ mkSimpleMult aLns bLns = circ
 
 simpleMult :: [String] -> [String] -> CircuitState [String]
 simpleMult a b = do 
-  out <- getConst $ 2*(length a) 
+  out <- getConst $ 2 * length a 
   start (head a) b out
   applyAdders (tail a) b (tail out) 
   return out
