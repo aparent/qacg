@@ -3,9 +3,12 @@ module CircUtils.Circuit
   ,LineInfo(..)
   ,Gate(..)
   ,writeQc
+  ,addLines
+  ,addGates
 ) where
 
 import Data.List
+import qualified Data.Set as Set 
 
 data Circuit = Circuit{   lineInfo :: LineInfo	      
 			, gates :: [Gate]
@@ -33,6 +36,15 @@ instance Show Gate where
 
 instance Show LineInfo where 
   show = writeLineInfo 
+
+addLines :: [String] -> Circuit -> Circuit
+addLines ls Circuit{lineInfo = l , gates=g, subcircuits=s} 
+  = Circuit (LineInfo newLines (inputs l) (outputs l) (outputLabels l)  ) g s 
+    where newLines  = Set.toList $ Set.union (Set.fromList ls) (Set.fromList $ vars l) 
+
+addGates :: [Gate] -> Circuit -> Circuit
+addGates gates Circuit{lineInfo = l , gates=g, subcircuits=s} 
+  = Circuit l (g++gates) s 
 
 -- |Takes a circuit and returns a string representing the .qc file
 writeQc :: Circuit -> String
