@@ -2,6 +2,11 @@ import CircUtils.Circuit
 import Control.Monad.State
 import qualified Data.Set as Set 
 
+--For karatsuba stuff
+import Data.List(minimumBy) 
+import Data.Function(on)
+import qualified Data.MemoCombinators as Memo
+
 --(ConstInUse,ConstAvail,circ)
 type CircuitState = State ([String],[String],Circuit)
 
@@ -32,6 +37,7 @@ setOutputs outs = state $ go
 
 tof :: [String] -> CircuitState () 
 tof lines = state $ \(cu,c,circ) ->  (() ,(cu, c, addGates [Gate "tof" lines] circ))
+
 
 --Some circuit constuctors 
 
@@ -104,3 +110,60 @@ simpleMult a b = do
           applyAdders [] b out = return ()
           applyAdders (x:xs) ys out = do simpleCtrlRipple x ys (take (length ys) out) $ out !! length ys
                                          applyAdders xs ys (tail out)
+
+--Below are things for karatsuba.  Should be 
+
+karatsuba :: [String] -> [String] -> CircuitState [String]
+karatsuba a b = assert( length a == length b ) $ go a b
+  where go | length a <= cuttoff = karaC 
+             otherwise           = karaR  
+          where cuttoff = 11 --This was found to be the best value
+                karaC = do a0b0 <- simpleMult a0 b0  
+                           a1b1 <- simpleMult a1 b1
+                           padding <- getConst $ s0 - s1
+                           (_, a0plusa1) <- simpleRipple a0 a1++take (s0-s1) padding
+                           (_, b0plusb1) <- simpleRipple b0 b1++drop (s0-s1) padding
+                           a0a1b0b1 <- simpleMult a0plusa1 b0plusb1
+                           simpleRipple a0 a1++take (s0-s1) padding
+                           simpleRipple b0 b1++drop (s0-s1) padding
+                           freeConst padding
+                a0 = take s0 a
+                a1 = drop s0 a
+                b0 = take s0 b
+                b1 = drop s0 b	
+								(s0,s1) = orderT $ karaM cuttoff length a 
+
+karaM :: Int -> Int -> (Int,(Int,Int))
+karaM = Memo.memo2 Memo.integral Memo.integral kara 
+
+kara :: Int -> Int -> (Int,(Int,Int))
+kara c n | n <= c = (4*n^2 - 2*n - 1,(div n 2, n - div n 2))  
+         | otherwise = minimumBy (compare `on` (\(x,y)-> x)) $ karaSizes c $ splits n
+
+ripAdd :: Int -> Int
+ripAdd n = 2*n
+
+naiveMult :: Int -> Int
+naiveMult n = 4*(n^2) - 2*n -1  
+
+karaSizes :: Int -> [(Int,Int)] -> [(Int,(Int,Int))]
+karaSizes c n =  map (\x -> (kSize x, x)) n
+  where kSize x = karas x + adders x
+        karas x = 2 * fst (karaM c (maxT x))  + fst(karaM c (minT x))
+        adders x = 4*(ripAdd $ (maxT x)*2-(mod (maxT x) 2)) + 4*(ripAdd $ maxT x)
+
+orderT :: (Int,Int) -> (Int,Int)
+orderT x = (maxT x, minT x)
+
+maxT :: (Int,Int) -> Int 
+maxT (x1,x2) = max x1 x2
+
+minT :: (Int,Int) -> Int 
+minT (x1,x2) = min x1 x2
+
+splits :: Int -> [(Int,Int)]
+splits  n = zip l $ reverse l
+  where l = [s..e]
+        s = div n 4 
+        e = 3*s + mod n 4
+
