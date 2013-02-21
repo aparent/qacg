@@ -5,7 +5,11 @@ import qualified Data.Set as Set
 --For karatsuba stuff
 import Data.List(minimumBy) 
 import Data.Function(on)
+import Control.Exception
 import qualified Data.MemoCombinators as Memo
+
+
+import Debug.Trace
 
 --(ConstInUse,ConstAvail,circ)
 type CircuitState = State ([String],[String],Circuit)
@@ -34,7 +38,6 @@ setOutputs outs = state $ go
           where nCLines = LineInfo  (vars $ lInfo) (inputs $ lInfo) outs (outputLabels $ lInfo) 
                 lInfo  = lineInfo c 
 
-
 tof :: [String] -> CircuitState () 
 tof lines = state $ \(cu,c,circ) ->  (() ,(cu, c, addGates [Gate "tof" lines] circ))
 
@@ -50,7 +53,7 @@ mkSimpleRipple aLns bLns = circ
                             setOutputs $ aOut ++ bOut
 
 simpleRipple :: [String] -> [String] -> CircuitState ([String], [String])
-simpleRipple a b = do 
+simpleRipple a b = assert (trace ("rip("++(show$length a)++","++(show$length b)++")") $ length a == length b) $ do
   cs <- getConst 2
   applyRipple ((cs!!0):a) b (cs!!1)
   freeConst [cs!!0]
@@ -69,8 +72,28 @@ simpleRipple a b = do
                  tof [z,x]
                  tof [x,y]
 
+simpleSubtract :: [String] -> [String] -> CircuitState ([String], [String])
+simpleSubtract a b = assert (trace ("sub("++(show$length a)++","++(show$length b)++")") $ length a == length b) $ do
+  cs <- getConst 2
+  applyRipple ((cs!!0):a) b (cs!!1)
+  freeConst [cs!!0]
+  return (a, b ++ [(cs!!1)])
+    where applyRipple (a:[]) [] z = tof [a,z] 
+          applyRipple (a0:a1:as) (b0:bs) z
+            = do uma a0 b0 a1 
+                 applyRipple (a1:as) bs z
+                 maj a0 b0 a1
+          maj x y z  
+            = do tof [z,y]
+                 tof [z,x]
+                 tof [x,y,z]
+          uma x y z  
+            = do tof [x,y,z]
+                 tof [z,x]
+                 tof [x,y]
+
 simpleCtrlRipple :: String -> [String] -> [String] -> String -> CircuitState ([String], [String])
-simpleCtrlRipple ctrl a b carry = do 
+simpleCtrlRipple ctrl a b carry = assert (trace ("RipCon("++(show$length a)++","++(show$length b)++")") $ length a == length b) $ do
   cs <- getConst 1
   applyRipple (head cs:a) b carry
   freeConst [head cs]
@@ -112,26 +135,43 @@ simpleMult a b = do
                                          applyAdders xs ys (tail out)
 
 --Below are things for karatsuba.  Should be 
+mkKaratsuba :: [String] -> [String] -> Circuit
+mkKaratsuba aLns bLns = circ
+  where (_,(_,_,circ)) = runState go ([],map (\x->'c':show x) [0..1000],Circuit (LineInfo [] [] [] []) [] [])
+        go             = do a <- initLines aLns
+                            b <- initLines bLns
+                            mOut <- karatsuba a b  
+                            setOutputs $ a ++ b ++ mOut
+
+sTrace a = trace (show a) a 
 
 karatsuba :: [String] -> [String] -> CircuitState [String]
-karatsuba a b = assert( length a == length b ) $ go a b
+karatsuba a b = assert (trace ("kara("++(show$length a)++","++(show$length b)++")") $ length a == length b) $ go
   where go | length a <= cuttoff = karaC 
-             otherwise           = karaR  
-          where cuttoff = 11 --This was found to be the best value
-                karaC = do a0b0 <- simpleMult a0 b0  
-                           a1b1 <- simpleMult a1 b1
+           | otherwise           = karaR  
+          where cuttoff = 5 --This was found to be the best value
+                karaR = do a0b0 <- karatsuba a0 b0  
+                           a1b1 <- karatsuba a1 b1
                            padding <- getConst $ s0 - s1
-                           (_, a0plusa1) <- simpleRipple a0 a1++take (s0-s1) padding
-                           (_, b0plusb1) <- simpleRipple b0 b1++drop (s0-s1) padding
-                           a0a1b0b1 <- simpleMult a0plusa1 b0plusb1
-                           simpleRipple a0 a1++take (s0-s1) padding
-                           simpleRipple b0 b1++drop (s0-s1) padding
+                           (_, a0plusa1) <- simpleRipple a0 $ a1++take (s0-s1) padding
+                           (_, b0plusb1) <- simpleRipple b0 $ b1++drop (s0-s1) padding
+                           a0a1b0b1 <- karatsuba a0plusa1 b0plusb1
+                           padding' <- getConst $ sTrace $ (length a0a1b0b1 - length a0b0) + (length a0a1b0b1 - length a1b1)
+                           simpleSubtract (a0b0 ++ take (length a0a1b0b1 - length a0b0) padding') a0a1b0b1
+                           simpleSubtract (a1b1 ++ drop (length a0a1b0b1 - length a0b0) padding') a0a1b0b1
+                           freeConst padding'
+                           --shifted adds here
+                           simpleRipple a0 $ a1++take (s0-s1) padding
+                           simpleRipple b0 $ b1++drop (s0-s1) padding
                            freeConst padding
+                           return a0a1b0b1
+                karaC = do r <- simpleMult a b
+                           return r 
                 a0 = take s0 a
                 a1 = drop s0 a
                 b0 = take s0 b
                 b1 = drop s0 b	
-								(s0,s1) = orderT $ karaM cuttoff length a 
+                (s0,s1) = (\(_,x) -> orderT x) $ karaM cuttoff $ length a 
 
 karaM :: Int -> Int -> (Int,(Int,Int))
 karaM = Memo.memo2 Memo.integral Memo.integral kara 

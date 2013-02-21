@@ -46,6 +46,9 @@ addGates :: [Gate] -> Circuit -> Circuit
 addGates gates Circuit{lineInfo = l , gates=g, subcircuits=s} 
   = Circuit l (g++gates) s 
 
+inverse :: Circuit -> Circuit
+inverse Circuit{lineInfo = l , gates=g, subcircuits=s} 
+  = Circuit l (reverse g) s
 -- |Takes a circuit and returns a string representing the .qc file
 writeQc :: Circuit -> String
 writeQc Circuit{lineInfo = l , gates=g, subcircuits=s} = writeLineInfo l++ writeSubcircuits s ++ "\nBEGIN\n" ++ writeGates g ++ "END\n"
