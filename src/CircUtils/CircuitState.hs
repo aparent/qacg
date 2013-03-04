@@ -1,3 +1,13 @@
+module CircUtils.CircuitState 
+(
+  CircuitState
+  ,getConst
+  ,freeConst
+  ,initLines 
+  ,setOutputs
+  ,tof
+) where
+
 import CircUtils.Circuit
 import Control.Monad.State
 import qualified Data.Set as Set 
