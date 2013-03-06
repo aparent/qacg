@@ -9,7 +9,6 @@ module CircUtils.Circuit
 ) where
 
 import Data.List
-import qualified Data.Set as Set 
 
 data Circuit = Circuit{   lineInfo :: LineInfo	      
 			, gates :: [Gate]
@@ -41,7 +40,7 @@ instance Show LineInfo where
 addLines :: [String] -> Circuit -> Circuit
 addLines ls Circuit{lineInfo = l , gates=g, subcircuits=s} 
   = Circuit (LineInfo newLines (inputs l) (outputs l) (outputLabels l)  ) g s 
-    where newLines  = Set.toList $ Set.union (Set.fromList ls) (Set.fromList $ vars l) 
+    where newLines  = union (vars l) ls 
 
 addGates :: [Gate] -> Circuit -> Circuit
 addGates gates Circuit{lineInfo = l , gates=g, subcircuits=s} 

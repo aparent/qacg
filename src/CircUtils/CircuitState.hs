@@ -10,12 +10,11 @@ module CircUtils.CircuitState
 
 import CircUtils.Circuit
 import Control.Monad.State
-import qualified Data.Set as Set 
 
 --For karatsuba stuff
-import Data.List(minimumBy) 
+import Data.List(minimumBy,(\\)) 
 import Data.Function(on)
-import Control.Exception
+import Control.Exception(assert)
 import qualified Data.MemoCombinators as Memo
 
 
@@ -28,13 +27,13 @@ getConst :: Int -> CircuitState [String]
 getConst n = state go
   where go (constU,const,c) = (newConst, (constU ++ newConst, const, newCirc))
           where newCirc = addLines newConst c 
-                availConst = Set.toList $ Set.difference  (Set.fromList const) (Set.fromList constU)
+                availConst = const \\ constU
                 newConst = take n availConst
 
 freeConst :: [String] -> CircuitState ()
 freeConst consts = state go
   where go (constU,const,c) = ( () , (newConstU, const, c) )
-          where newConstU = Set.toList $ Set.difference (Set.fromList constU) (Set.fromList consts)
+          where newConstU = constU \\ consts
 
 initLines :: [String] -> CircuitState [String]
 initLines nLines = state go
@@ -140,7 +139,7 @@ simpleMult a b = do
 --Below are things for karatsuba.  Should be 
 mkKaratsuba :: [String] -> [String] -> Circuit
 mkKaratsuba aLns bLns = circ
-  where (_,(_,_,circ)) = runState go ([],map (\x->'c':show x) [1000..9999],Circuit (LineInfo [] [] [] []) [] [])
+  where (_,(_,_,circ)) = runState go ([],map (\x->'c':show x) [100..999],Circuit (LineInfo [] [] [] []) [] [])
         go             = do a <- initLines aLns
                             b <- initLines bLns
                             mOut <- karatsuba a b  
@@ -150,7 +149,7 @@ sTrace a = trace (show a) a
 
 karatsuba :: [String] -> [String] -> CircuitState [String]
 karatsuba a b = assert (trace ("kara("++(show.length) a++","++ (show.length) b ++")") $ length a == length b) go
-  where go | length a <= cuttoff = karaC 
+  where go | length a <= cuttoff = simpleMult a b 
            | otherwise           = karaR  
           where cuttoff = 5 --11 was found to be the best value (may be incorrect do to reduction of one adder
                 karaR = do a0b0 <- karatsuba a0 b0  
@@ -172,8 +171,6 @@ karatsuba a b = assert (trace ("kara("++(show.length) a++","++ (show.length) b +
                            freeConst zs
                            freeConst padding
                            return $ a0b0 ++ a1b1
-                karaC = do r <- simpleMult a b
-                           return $ r 
                 a0 = take s0 a
                 a1 = drop s0 a
                 b0 = take s0 b
