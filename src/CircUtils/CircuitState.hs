@@ -9,6 +9,7 @@ module CircUtils.CircuitState
   ,leftTof
   ,rightTof
   ,cnot
+  ,notgate
 ) where
 
 import CircUtils.Circuit
@@ -66,6 +67,9 @@ tgateInv x = appendGate "T*" [x]
 cnot :: String -> String -> CircuitState ()
 cnot c t = appendGate "tof" [c,t]
 
+notgate :: String -> CircuitState ()
+notgate x = appendGate "tof" [x]
+
 --tof :: String -> String -> String -> CircuitState () 
 --tof x y z = appendGate "tof" [x,y,z]
 
@@ -122,7 +126,8 @@ tofMatchedD1 x y z = do consts <- getConst 1
 
 leftTof :: String -> String -> String -> CircuitState () 
 leftTof x y z 
-  = do cnot z y  
+  = do hadamard z
+       cnot z y  
        cnot y x  
        tgate x
        tgateInv y
@@ -131,10 +136,12 @@ leftTof x y z
        cnot y x
        tgateInv x
        cnot z x
+       hadamard z
 
 rightTof :: String -> String -> String -> CircuitState () 
 rightTof x y z 
-  = do cnot z x
+  = do hadamard z
+       cnot z x
        tgateInv x
        cnot y x
        cnot z y
@@ -143,7 +150,7 @@ rightTof x y z
        tgate x
        cnot y x  
        cnot z y  
-
+       hadamard z
 
 
 --Some circuit constuctors 

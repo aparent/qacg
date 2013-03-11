@@ -9,7 +9,7 @@ import CircUtils.CircuitState
 import Control.Monad.State
 
 mcToff :: [String] -> String -> CircuitState ()
-mcToff conts targ = do reduceCont conts []
+mcToff conts targ = reduceCont conts []
   where reduceCont (x:y:xs) red = do c <- getConst 1
                                      leftTof x y (head c)    
                                      reduceCont xs $ head c : red
@@ -27,4 +27,3 @@ mkMcToff controls target = circ
                             mcToff controls target
                             initLines [target]
                             setOutputs $ controls ++ [target]
-

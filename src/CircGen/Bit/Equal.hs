@@ -1,6 +1,6 @@
 module CircGen.Bit.Shift
-( and
-  ,mkBitwiseAnd
+( equal
+  ,mkEqual
 ) where
 
 import CircUtils.Circuit
@@ -9,21 +9,24 @@ import Control.Monad.State
 import CircGen.Bit.MCToff
 import Control.Exception
 
-bitwiseAnd :: [String] -> [String] -> String -> CircuitState ()
-bitwiseAnd a b targ = assert (length a == length b) $ go a b []
-  where go (a:as) (b:bs) cs =  do c <- getConst 1 
-                                  leftTof a b (head c)
-                                  go as bs (head c : cs)
-                                  rightTof a b (head c)
-                                  freeConst c
-        go [] [] cs = mcToff cs targ
+equal :: [String] -> [String] -> String -> CircuitState ()
+equal x y targ = assert (length x == length y) $ go x y
+  where go (a:as) (b:bs) =  do cnot a b 
+                               go as bs
+                               cnot a b
+        go [] [] = do applyNots y 
+                      mcToff y targ
+                      applyNots y
+        applyNots (l:ls) = do notgate l
+                              applyNots ls
+        applyNots [] = return ()
 
-mkBitwiseAnd:: [String]-> [String] -> String -> Circuit
-mkBitwiseAnd a b targ = circ
+mkEqual :: [String]-> [String] -> String -> Circuit
+mkEqual a b targ = circ
   where (_,(_,_,circ)) = runState go ([], map (\x->'c':show x) [0..(3 * length a)] , Circuit (LineInfo [] [] [] []) [] [])
         go             = do as <- initLines a
                             bs <- initLines b
                             t <- initLines [targ]
-                            bitwiseAnd a b (head t)
+                            equal a b (head t)
                             setOutputs $ as ++ bs ++ t
 
