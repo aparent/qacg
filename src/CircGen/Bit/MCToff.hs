@@ -19,10 +19,9 @@ mcToff conts targ = reduceCont conts []
         reduceCont []     red | length red > 1 = reduceCont red []
                               | otherwise = cnot (head red) targ
 
-
 mkMcToff:: [String] -> String -> Circuit
 mkMcToff controls target = circ
-  where (_,(_,_,circ)) = runState go ([], map (\x->'c':show x) [0.. (2*length controls)] , Circuit (LineInfo [] [] [] []) [] [])
+  where (_,(_,_,circ)) = runState go ([], ['c':show x | x <- [0 .. (2*length controls)]], Circuit (LineInfo [] [] [] []) [] [])
         go             = do initLines controls
                             mcToff controls target
                             initLines [target]
