@@ -36,8 +36,7 @@ getConst n = state go
 
 freeConst :: [String] -> CircuitState ()
 freeConst consts = state go
-  where go (constU,const,c) = ( () , (newConstU, const, c) )
-          where newConstU = constU \\ consts
+  where go (constU,const,c) = ( () , (constU \\ consts, const, c) )
 
 initLines :: [String] -> CircuitState [String]
 initLines nLines = state go

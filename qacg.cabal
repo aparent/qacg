@@ -1,10 +1,12 @@
 Name:                qacg
 Version:             0.0
 Description:         Quantum Arithmetic Circuit Generation
-License:             AllRightsReserved
+license:             BSD3
 License-file:        LICENSE
 Author:              Alex Parent
 Maintainer:          alexparent@gmail.com
+homepage:            https://github.com/aparent/qacg 
+bug-reports:         https://github.com/aparent/qacg/issues
 Build-Type:          Simple
 Cabal-Version:       >=1.2
 
