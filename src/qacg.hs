@@ -1,11 +1,12 @@
 import System.Environment
 
-import CircGen.Mult.SimpleMultAlt
-import CircGen.Add.SimpleRipple
-import CircGen.Bit.Shift
 import CircUtils.Circuit
 import CircUtils.CircuitToXML
 import Text.XML.HXT.Core
+
+import CircGen.Mult.SimpleMult
+import CircGen.Add.SimpleRipple
+import CircGen.Bit.Shift
 
 --usage: qacg <directory> <circuitName> <size>
 main :: IO()
@@ -15,11 +16,14 @@ main = do
   size  <- return $ read $ head $ tail args
   dir   <- return $ head $ tail $ tail args
   case cName of
-    "adder"      ->  writeCircuit (dir++"adder"     )  $ simpleRipple size
-    "adderCtrl"  ->  writeCircuit (dir++"adderCtrl" )  $ simpleRippleCtrl size
-    "multiplier" ->  writeCircuit (dir++"multiplier")  $ simpleMultAlt size
-    "shiftCtrl"  ->  writeCircuit (dir++"shiftCtrl" )  $ contShift size
+    "adderUnsignedInPlaceCarry"        ->  writeCircuit (dir++cName)  $ simpleRippleSize size
+    "adderUnsignedInPlaceCarryControl" ->  writeCircuit (dir++cName)  $ simpleCtrlRippleSize size
+    "multUnsignedOutOfPlace"           ->  writeCircuit (dir++cName)  $ simpleMultSize size
+    "shiftLeftControl"                 ->  writeCircuit (dir++cName)  $ contShift size
     _ -> putStrLn $ "No generator for " ++ cName
+  where simpleRippleSize n = mkSimpleRipple ['a':show x|x<-[0..n-1]] ['b':show x|x<-[0..n-1]] "z"
+        simpleCtrlRippleSize n = mkSimpleCtrlRipple "control" ['a':show x|x<-[0..n-1]] ['b':show x|x<-[0..n-1]] "z"
+        simpleMultSize n = mkSimpleMult ['a':show x|x<-[0..n-1]] ['b':show x|x<-[0..n-1]]
 
 writeCircuit :: String-> Circuit -> IO()
 writeCircuit fname circ = do 

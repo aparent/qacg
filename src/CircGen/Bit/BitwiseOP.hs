@@ -14,6 +14,8 @@ import CircUtils.CircuitState
 import Control.Monad.State
 import Control.Exception
 
+import CircGen.Bit.Toffoli
+
 bitwise :: (String -> String -> String -> CircuitState ()) -> [String] -> [String] -> [String] ->  CircuitState ()
 bitwise f a b c = assert (length a == length b && length a == length c) $ go a b c 
   where go (x:xs) (y:ys) (z:zs)  = do f x y z

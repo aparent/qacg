@@ -8,6 +8,8 @@ import CircUtils.Circuit
 import CircUtils.CircuitState
 import Control.Monad.State
 
+import CircGen.Bit.Toffoli
+
 mcToff :: [String] -> String -> CircuitState ()
 mcToff conts targ = reduceCont conts []
   where reduceCont (x:y:xs) red = do c <- getConst 1

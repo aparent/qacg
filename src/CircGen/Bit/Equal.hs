@@ -9,6 +9,8 @@ import Control.Monad.State
 import CircGen.Bit.MCToff
 import Control.Exception
 
+import CircGen.Bit.Toffoli
+
 equal :: [String] -> [String] -> String -> CircuitState ()
 equal x y targ = assert (length x == length y) $ go x y
   where go (a:as) (b:bs) =  do cnot a b 

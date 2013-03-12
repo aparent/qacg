@@ -3,6 +3,8 @@ module CircGen.Bit.Compare
 ) where
 
 
+import CircGen.Bit.Toffoli
+
 lessThen :: [String] -> [String] -> String -> CircuitState ([String], [String])
 lessThen a b t = assert (trace ("rip("++(show.length) a++","++(show.length) b++")") $ length a == length b) $ do
   cs <- getConst 1
