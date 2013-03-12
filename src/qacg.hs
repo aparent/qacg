@@ -10,10 +10,10 @@ import Text.XML.HXT.Core
 --usage: qacg <directory> <circuitName> <size>
 main :: IO()
 main = do 
-  args   <- getArgs
-  dir    <- return $ head args
-  cName  <- return $ head $ tail args
-  size   <- return $ read $ head $ tail $ tail args
+  args  <- getArgs
+  cName <- return $ head args
+  size  <- return $ read $ head $ tail args
+  dir   <- return $ head $ tail $ tail args
   case cName of
     "adder"      ->  writeCircuit (dir++"adder"     )  $ simpleRipple size
     "adderCtrl"  ->  writeCircuit (dir++"adderCtrl" )  $ simpleRippleCtrl size
