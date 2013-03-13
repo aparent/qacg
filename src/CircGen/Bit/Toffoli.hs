@@ -8,12 +8,9 @@ module CircGen.Bit.Toffoli
 import CircUtils.CircuitState
 import Control.Exception(assert)
 
-import Debug.Trace
-sTrace a = trace (show a) a 
-
 tof :: String -> String -> String -> CircuitState () 
-tof x y z = do consts <- getConst 4
-               assert (length (sTrace consts) == 4) $ applyTof x y z consts
+tof a b c = do consts <- getConst 4
+               assert (length consts == 4) $ applyTof a b c consts
                freeConst consts        
   where applyTof x y z [c0,c1,c2,c3] 
           = do hadamard z
@@ -41,10 +38,11 @@ tof x y z = do consts <- getConst 4
                cnot x  c0
                cnot y  c2
                hadamard z
+        applyTof _ _ _ _ = assert False $ return () --Should never happen!
 
 tofMatchedD1 :: String -> String -> String -> CircuitState () 
-tofMatchedD1 x y z = do consts <- getConst 1
-                        applyTof x y z (head consts)
+tofMatchedD1 e f g = do consts <- getConst 1
+                        applyTof e f g (head consts)
                         freeConst consts        
   where applyTof x y z c 
           = do hadamard z

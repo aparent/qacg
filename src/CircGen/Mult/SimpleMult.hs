@@ -11,6 +11,7 @@ import Control.Monad.State
 import CircGen.Add.SimpleRipple
 import CircGen.Bit.Toffoli
 
+import Control.Exception(assert)
 -- | Generates a simple addition based multiplication circuit 
 mkSimpleMult :: [String] -> [String] -> Circuit
 mkSimpleMult aLns bLns = circ
@@ -29,6 +30,7 @@ simpleMult a b = do
     where start x (y:[]) (c:_) = tof x y c
           start x (y:ys) (c:cs) = do tof x y c
                                      start x ys cs 
+          start _ _ _ = assert False $ return () --Should never happen!
           applyAdders [] _ _ = return ()
           applyAdders (x:xs) ys out = do _ <- simpleCtrlRipple x ys (take (length ys) out) $ out !! length ys
                                          applyAdders xs ys (tail out)

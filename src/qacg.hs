@@ -25,12 +25,14 @@ main = do
     "orOutOfPlace"                     ->  writeCircuit (dir++cName)  $ orOutOfPlace size
     "xorOutOfPlace"                    ->  writeCircuit (dir++cName)  $ xorOutOfPlace size
     _ -> putStrLn $ "No generator for " ++ cName
-  where simpleRippleSize n = mkSimpleRipple ['a':show x|x<-[0..n-1]] ['b':show x|x<-[0..n-1]] "z"
-        simpleCtrlRippleSize n = mkSimpleCtrlRipple "control" ['a':show x|x<-[0..n-1]] ['b':show x|x<-[0..n-1]] "z"
-        simpleMultSize n = mkSimpleMult ['a':show x|x<-[0..n-1]] ['b':show x|x<-[0..n-1]]
-        andOutOfPlace n = mkBitwiseAND ['a':show x|x<-[0..n-1]] ['b':show x|x<-[0..n-1]] ['z':show x|x<-[0..n-1]]
-        orOutOfPlace  n = mkBitwiseOR  ['a':show x|x<-[0..n-1]] ['b':show x|x<-[0..n-1]] ['z':show x|x<-[0..n-1]]
-        xorOutOfPlace n = mkBitwiseXOR ['a':show x|x<-[0..n-1]] ['b':show x|x<-[0..n-1]] ['z':show x|x<-[0..n-1]]
+  where simpleRippleSize n = mkSimpleRipple (var 'a' n) (var 'b' n) "z"
+        simpleCtrlRippleSize n = mkSimpleCtrlRipple "control" (var 'a' n) (var 'b' n) "z"
+        simpleMultSize n = mkSimpleMult (var 'a' n) (var 'b' n)
+        andOutOfPlace n =  mkBitwiseAND (var 'a' n) (var 'b' n) (var 'z' n)
+        orOutOfPlace  n =  mkBitwiseOR  (var 'a' n) (var 'b' n) (var 'z' n)
+        xorOutOfPlace n =  mkBitwiseXOR (var 'a' n) (var 'b' n) (var 'z' n)
+        var vName n = [ vName : show x|x<-[0..n-1]] 
+        
 
 
         

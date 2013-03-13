@@ -5,7 +5,6 @@ module CircUtils.Circuit
   ,writeQc
   ,addLines
   ,addGates
-  ,packCirc
 ) where
 
 import Data.List
@@ -43,26 +42,9 @@ addLines ls Circuit{lineInfo = l , gates=g, subcircuits=s}
     where newLines  = union (vars l) ls 
 
 addGates :: [Gate] -> Circuit -> Circuit
-addGates gates Circuit{lineInfo = l , gates=g, subcircuits=s} 
-  = Circuit l (g++gates) s 
+addGates newGates Circuit{lineInfo = l , gates=g, subcircuits=s} 
+  = Circuit l (g++newGates) s 
 
-inverse :: Circuit -> Circuit
-inverse Circuit{lineInfo = l , gates=g, subcircuits=s} 
-  = Circuit l (reverse g) s
-
-packCirc :: Circuit -> Circuit
-packCirc Circuit{lineInfo = l , gates=g, subcircuits=s} 
-  = Circuit l (greedyPack g) s 
-
-greedyPack :: [Gate] -> [Gate]
-greedyPack gates = go gates 1
-  where go gs n       | n < length gs = go (swapBack  gs n) (n + 1)
-                      | otherwise     = gs 
-        swapBack gs 0 = gs 
-        swapBack gs 1 = gs 
-        swapBack gs n | intersect (lineNames$gs!!n) (lineNames$gs!!(n-1)) == [] = swapBack ((take (n-1) gs)++[(gs!!n),(gs!!(n-1))] ++ drop (n+1) gs) (n-2)
-                      | otherwise                                               = gs
-        
 -- |Takes a circuit and returns a string representing the .qc file
 writeQc :: Circuit -> String
 writeQc Circuit{lineInfo = l , gates=g, subcircuits=s} = writeLineInfo l++ writeSubcircuits s ++ "\nBEGIN\n" ++ writeGates g ++ "END\n"

@@ -21,6 +21,7 @@ bitwise f a b c = assert (length a == length b && length a == length c) $ go a b
   where go (x:xs) (y:ys) (z:zs)  = do f x y z
                                       go xs ys zs
         go [] [] [] = return ()
+        go _ _ _ = assert False $ return () --Should never happen!
 
 bitAND :: String -> String -> String -> CircuitState ()  
 bitAND = tof 

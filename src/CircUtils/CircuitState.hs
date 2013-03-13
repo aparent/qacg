@@ -17,26 +17,21 @@ import CircUtils.Circuit
 import Control.Monad.State
 
 --For karatsuba stuff
-import Data.List(minimumBy,(\\)) 
-import Data.Function(on)
-import Control.Exception(assert)
-
-import Debug.Trace
-sTrace a = trace (show a) a 
+import Data.List((\\)) 
 
 --(ConstInUse,ConstAvail,circ)
 type CircuitState = State ([String],[String],Circuit)
 
 getConst :: Int -> CircuitState [String]
 getConst n = state go
-  where go (constU,const,c) = (newConst, (constU ++ newConst, const, newCirc))
+  where go (constU,constA,c) = (newConst, (constU ++ newConst, constA, newCirc))
           where newCirc = addLines newConst c 
-                availConst = const \\ constU
+                availConst = constA \\ constU
                 newConst = take n availConst
 
 freeConst :: [String] -> CircuitState ()
 freeConst consts = state go
-  where go (constU,const,c) = ( () , (constU \\ consts, const, c) )
+  where go (constU,constA,c) = ( () , (constU \\ consts, constA, c) )
 
 initLines :: [String] -> CircuitState [String]
 initLines nLines = state go
@@ -51,8 +46,7 @@ setOutputs outs = state go
                 lInfo  = lineInfo c 
 
 appendGate :: String -> [String] -> CircuitState ()
-appendGate gateName lines = state $ \(cu,c,circ) ->  (() ,(cu, c, addGates [Gate gateName lines] circ))
-
+appendGate gateName targs = state $ \(cu,c,circ) ->  (() ,(cu, c, addGates [Gate gateName targs] circ))
 
 hadamard :: String -> CircuitState ()
 hadamard x = appendGate "H" [x]

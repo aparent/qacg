@@ -3,6 +3,7 @@ module CircGen.Add.SimpleRipple
  ,simpleCtrlRipple
  ,mkSimpleRipple
  ,mkSimpleCtrlRipple
+ ,simpleSubtract
 ) where
 
 import CircUtils.Circuit
@@ -16,28 +17,29 @@ import CircGen.Bit.Toffoli
 -- |Generates the addition circuit in <http://arxiv.org/abs/quant-ph/0410184> and returns it as a circuit
 mkSimpleRipple :: [String] -> [String] -> String -> Circuit
 mkSimpleRipple aLns bLns carry = circ
-  where (_,(_,_,circ)) = runState go ([], map (\x->'c':show x) [0..10] , Circuit (LineInfo [] [] [] []) [] [])
+  where (_,(_,_,circ)) = runState go ([], ['c':show x|x<-[0..10]] , Circuit (LineInfo [] [] [] []) [] [])
         go             = do (aOut,bOut) <- simpleRipple aLns bLns carry
-                            initLines aLns
-                            initLines bLns
-                            initLines [carry]
+                            _ <- initLines aLns
+                            _ <- initLines bLns
+                            _ <- initLines [carry]
                             setOutputs $ aOut ++ bOut ++ [carry]
 
 mkSimpleCtrlRipple :: String -> [String] -> [String] -> String -> Circuit
 mkSimpleCtrlRipple ctrl aLns bLns carry = circ
-  where (_,(_,_,circ)) = runState go ([], map (\x->'c':show x) [0..10] , Circuit (LineInfo [] [] [] []) [] [])
+  where (_,(_,_,circ)) = runState go ([], ['c':show x|x<-[0..10]] , Circuit (LineInfo [] [] [] []) [] [])
         go             = do (aOut,bOut) <- simpleCtrlRipple ctrl aLns bLns carry
-                            initLines aLns
-                            initLines bLns
-                            initLines [carry]
+                            _ <- initLines aLns
+                            _ <- initLines bLns
+                            _ <- initLines [carry]
                             setOutputs $ aOut ++ bOut ++ [carry]
 
-
+maj :: String -> String -> String -> CircuitState () 
 maj x y z 
   = do cnot z y
        cnot z x
        leftTof x y z
 
+uma :: String -> String -> String -> CircuitState () 
 uma x y z  
   = do rightTof x y z
        cnot z x
@@ -49,23 +51,25 @@ simpleRipple a b carry = assert (trace ("rip("++(show.length) a++","++(show.leng
   applyRipple (head cs:a) b carry
   freeConst [head cs]
   return (a, b ++ [carry])
-    where applyRipple (a:[]) [] z = cnot a z 
+    where applyRipple (a0:[]) [] z = cnot a0 z 
           applyRipple (a0:a1:as) (b0:bs) z
             = do maj a0 b0 a1 
                  applyRipple (a1:as) bs z
                  uma a0 b0 a1
+          applyRipple _ _ _ = assert False $ return () --Should never happen!
 
 simpleSubtract :: [String] -> [String] -> CircuitState ([String], [String])
 simpleSubtract a b = assert (trace ("sub("++(show.length) a++","++(show.length) b++")") $ length a == length b) $ do
   cs <- getConst 2
-  applyRipple (head cs:a) b (cs!!1)
+  applyRippleSub (head cs:a) b (cs!!1)
   freeConst [head cs]
   return (a, b ++ [cs!!1])
-    where applyRipple (a:[]) [] z = cnot a z 
-          applyRipple (a0:a1:as) (b0:bs) z
+    where applyRippleSub (a0:[]) [] z = cnot a0 z 
+          applyRippleSub (a0:a1:as) (b0:bs) z
             = do uma a0 b0 a1 
-                 applyRipple (a1:as) bs z
+                 applyRippleSub (a1:as) bs z
                  maj a0 b0 a1
+          applyRippleSub _ _ _ = assert False $ return () --Should never happen!
 
 simpleCtrlRipple :: String -> [String] -> [String] -> String -> CircuitState ([String], [String])
 simpleCtrlRipple ctrl a b carry = assert (trace ("RipCon("++(show.length) a++","++(show.length) b++")") $ length a == length b) $ do
@@ -73,11 +77,12 @@ simpleCtrlRipple ctrl a b carry = assert (trace ("RipCon("++(show.length) a++","
   applyRippleC (head cs:a) b carry
   freeConst [head cs]
   return (a, b )
-    where applyRippleC (a:[]) [] z = cnot a z 
+    where applyRippleC (a0:[]) [] z = cnot a0 z 
           applyRippleC (a0:a1:as) (b0:bs) z
             = do majC a0 b0 a1 
                  applyRippleC (a1:as) bs z
                  umaC a0 b0 a1
+          applyRippleC _ _ _ = assert False $ return () --Should never happen!
           majC x y z  
             = do tof ctrl z y
                  cnot z x
