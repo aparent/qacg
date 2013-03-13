@@ -19,8 +19,8 @@ instance Show BExpr where
   show (V a) =  a  
   show (C True) = show 1 
   show (C False) = show 0
-  show (And a) = List.concat (List.intersperse "&" (map show a))
-  show (Xor a) = "(" ++ List.concat (List.intersperse "+" (map show a)) ++ ")"
+  show (And a) = intercalate "&" (map show a)
+  show (Xor a) = "(" ++ intercalate "+" (map show a) ++ ")"
 
 simplify :: BExpr -> BExpr
 simplify = reduceConst . combine . reduce
@@ -29,25 +29,25 @@ reduce :: BExpr -> BExpr
 reduce (Xor a) = Xor (reduceXor $ map reduce a)
   where reduceXor = onlyOdd . List.group . List.sort
         onlyOdd [] = []
-        onlyOdd (x:xs) = if ((length x) `mod` 2) == 1 
-                         then (head x):(onlyOdd xs) 
+        onlyOdd (x:xs) = if (length x `mod` 2) == 1 
+                         then head x : onlyOdd xs
                          else onlyOdd xs
 reduce (And a) = And (reduceAnd $ map reduce a)
   where reduceAnd = List.sort . List.nub
 reduce a = a
 
 reduceConst :: BExpr -> BExpr
-reduceConst (And a) | any ( \x -> x == (C False) ) a'  = C False 
+reduceConst (And a) | any ( \x -> x == C False ) a'  = C False 
                     | otherwise =  And (removeOnes a')
   where a' = map reduceConst a
         removeOnes [] = []
-        removeOnes ((C True):xs)  = removeOnes xs 
+        removeOnes (C True:xs)  = removeOnes xs 
         removeOnes (x:xs) = x : removeOnes xs
 reduceConst (Xor a)  | length a' >= 1 = Xor (removeZeros a') 
                      | otherwise      = C False
   where a' = map reduceConst a
         removeZeros [] = []
-        removeZeros ((C False):xs)  = removeZeros xs 
+        removeZeros (C False:xs)  = removeZeros xs 
         removeZeros (x:xs) = x : removeZeros xs
 reduceConst a = a        
 
@@ -99,12 +99,12 @@ vars a = List.sort $ List.nub $ findVars a
 evaluate :: [Bool] -> BExpr -> Bool
 evaluate _ (Xor []) = False
 evaluate _ (And []) = False
-evaluate vals exp = eval $ (replaceVars vals) exp
+evaluate vals exp = eval $ replaceVars vals exp
   where replaceVars (val:vals) exp 
-          | length (vars exp) == 0 = exp 
+          | null (vars exp) = exp 
           | otherwise = replaceVars vals exp'
 	  where exp' = replaceVar (curVar,val) exp
 	        curVar = head $ vars exp
-        eval (And exps) = foldr1 (&&) $ map eval exps
+        eval (And exps) = all eval exps
         eval (Xor exps) = foldr1 (\x y -> (x||y) && not (x&&y)) $ map eval exps
         eval (C v) = v

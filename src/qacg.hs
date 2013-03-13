@@ -13,9 +13,9 @@ import CircGen.Bit.BitwiseOP
 main :: IO()
 main = do 
   args  <- getArgs
-  cName <- return $ head args
-  size  <- return $ read $ head $ tail args
-  dir   <- return $ head $ tail $ tail args
+  let cName = head args
+  let size  = read $ head $ tail args
+  let dir   = head $ tail $ tail args
   case cName of
     "adderUnsignedInPlaceCarry"        ->  writeCircuit (dir++cName)  $ simpleRippleSize size
     "adderUnsignedInPlaceCarryControl" ->  writeCircuit (dir++cName)  $ simpleCtrlRippleSize size
@@ -31,11 +31,7 @@ main = do
         andOutOfPlace n =  mkBitwiseAND (var 'a' n) (var 'b' n) (var 'z' n)
         orOutOfPlace  n =  mkBitwiseOR  (var 'a' n) (var 'b' n) (var 'z' n)
         xorOutOfPlace n =  mkBitwiseXOR (var 'a' n) (var 'b' n) (var 'z' n)
-        var vName n = [ vName : show x|x<-[0..n-1]] 
-        
-
-
-        
+        var vName n = [ vName:show x | x<-[0..n-1] ] 
 
 writeCircuit :: String-> Circuit -> IO()
 writeCircuit fname circ = do 
