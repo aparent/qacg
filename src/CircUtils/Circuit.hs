@@ -39,7 +39,7 @@ instance Show LineInfo where
 addLines :: [String] -> Circuit -> Circuit
 addLines ls Circuit{lineInfo = l , gates=g, subcircuits=s} 
   = Circuit (LineInfo newLines (inputs l) (outputs l) (outputLabels l)  ) g s 
-    where newLines  = union (vars l) ls 
+    where newLines  = vars l `union` ls 
 
 addGates :: [Gate] -> Circuit -> Circuit
 addGates newGates Circuit{lineInfo = l , gates=g, subcircuits=s} 
@@ -53,18 +53,15 @@ writeSubcircuits :: [(Circuit,String)] -> String
 writeSubcircuits = concatMap writeSubcircuit 
 
 writeSubcircuit :: (Circuit,String) -> String
-writeSubcircuit (c,n) =  "\nBEGIN "++ n ++"("++writeVars (vars $ lineInfo c) ++")\n" ++ writeGates (gates c) ++ "END " ++ n ++ "\n" 
+writeSubcircuit (c,n) =  "\nBEGIN "++ n ++"("++ unwords (vars $ lineInfo c) ++")\n" ++ writeGates (gates c) ++ "END " ++ n ++ "\n" 
                           ++ concatMap writeSubcircuit (subcircuits c)
 
 writeLineInfo :: LineInfo -> String
 writeLineInfo LineInfo{vars=v,inputs=i,outputs=o,outputLabels = ol} = 
-	".v " ++ writeVars v ++ "\n.i "++ writeVars i ++ "\n.o " ++ writeVars o ++ "\n.ol " ++ writeVars ol ++ "\n"
+	".v " ++ unwords v ++ "\n.i "++ unwords i ++ "\n.o " ++ unwords o ++ "\n.ol " ++ unwords ol ++ "\n"
 	
-writeVars :: [String] -> String
-writeVars = intercalate " "
-
 writeGates :: [Gate] -> String
 writeGates = concatMap writeGate 
 
 writeGate :: Gate -> String
-writeGate Gate{name=n,lineNames=l} = n ++ " " ++ writeVars l ++ "\n"
+writeGate Gate{name=n,lineNames=l} = n ++ " " ++ unwords l ++ "\n"

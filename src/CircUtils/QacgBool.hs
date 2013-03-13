@@ -43,7 +43,7 @@ reduceConst (And a) | any ( \x -> x == C False ) a'  = C False
         removeOnes [] = []
         removeOnes (C True:xs)  = removeOnes xs 
         removeOnes (x:xs) = x : removeOnes xs
-reduceConst (Xor a)  | length a' >= 1 = Xor (removeZeros a') 
+reduceConst (Xor a)  | not (null a') >= 1 = Xor (removeZeros a') 
                      | otherwise      = C False
   where a' = map reduceConst a
         removeZeros [] = []

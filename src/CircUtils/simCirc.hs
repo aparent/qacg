@@ -19,7 +19,7 @@ data SGType = TOF | SWAP
 
 applyGates :: SCirc -> [SLine]
 applyGates (lines,[])   = lines
-applyGates (lines,gate:gates) = map (\(x,y) -> (x,flatten y))  $ applyGates ((applyG lMap gate), gates)
+applyGates (lines,gate:gates) = map (\(x,y) -> (x,flatten y))  $ applyGates (applyG lMap gate, gates)
   where lMap = Map.fromList lines
         applyG l g | length g == 1 =  Map.toList $ Map.adjust ( \l -> Xor [C True,l] ) (head g) l  -- Not
                    | length g == 2 =  Map.toList $ Map.adjust ( \l -> Xor [head (gExp $ tail g),l] ) (head g) l -- Cnot
@@ -34,9 +34,7 @@ convToSCirc:: Circuit -> SCirc
 convToSCirc Circuit{line_info = l , gates=g, subcircuits=s} = (getLines (vars l), getGates g) 
 
 getLines :: [String] -> [SLine]  
-getLines [] = []
-getLines (x:xs) = (x, V x):(getLines xs)
+getLines = map (\ x -> (x, V x))
 
 getGates :: [Gate] -> [SGate]
-getGates [] = []
-getGates (g:gs) = (List.reverse$line_names g):(getGates gs)   
+getGates = map (List.reverse $line_names) 
