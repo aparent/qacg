@@ -1,4 +1,4 @@
-module CircGen.Add.SimpleRipple
+module QACG.CircGen.Add.SimpleRipple
 ( simpleRipple
  ,simpleCtrlRipple
  ,mkSimpleRipple
@@ -6,13 +6,13 @@ module CircGen.Add.SimpleRipple
  ,simpleSubtract
 ) where
 
-import CircUtils.Circuit
-import CircUtils.CircuitState
+import QACG.CircUtils.Circuit
+import QACG.CircUtils.CircuitState
 import Control.Monad.State
 import Control.Exception(assert)
 import Debug.Trace
 
-import CircGen.Bit.Toffoli
+import QACG.CircGen.Bit.Toffoli
 
 -- |Generates the addition circuit in <http://arxiv.org/abs/quant-ph/0410184> and returns it as a circuit
 mkSimpleRipple :: [String] -> [String] -> String -> Circuit

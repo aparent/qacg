@@ -1,13 +1,12 @@
 import System.Environment
 
-import CircUtils.Circuit
-import CircUtils.CircuitToXML
-import Text.XML.HXT.Core
+import QACG.CircUtils.Circuit
+import QACG.CircUtils.CircuitToXML
 
-import CircGen.Mult.SimpleMult
-import CircGen.Add.SimpleRipple
-import CircGen.Bit.Shift
-import CircGen.Bit.BitwiseOP
+import QACG.CircGen.Mult.SimpleMult
+import QACG.CircGen.Add.SimpleRipple
+import QACG.CircGen.Bit.Shift
+import QACG.CircGen.Bit.BitwiseOP
 
 --usage: qacg <directory> <circuitName> <size>
 main :: IO()
@@ -34,7 +33,7 @@ main = do
         var vName n = [ vName:show x | x<-[0..n-1] ] 
 
 writeCircuit :: String-> Circuit -> IO()
-writeCircuit fname circ = do 
-  writeFile (fname++".qc") (show circ)
-  _ <- runX ( circToXML fname circ )
-  return() 
+writeCircuit fname circ = 
+  do writeFile (fname++".qc") (show circ)
+     writeCircuitXML fname circ
+     return() 

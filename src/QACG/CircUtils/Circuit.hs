@@ -1,4 +1,4 @@
-module CircUtils.Circuit 
+module QACG.CircUtils.Circuit 
 ( Circuit(..)
   ,LineInfo(..)
   ,Gate(..)

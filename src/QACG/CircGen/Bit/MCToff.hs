@@ -1,14 +1,14 @@
-module CircGen.Bit.MCToff
+module QACG.CircGen.Bit.MCToff
 ( mcToff
   ,mkMcToff
 ) where
 
 
-import CircUtils.Circuit
-import CircUtils.CircuitState
+import QACG.CircUtils.Circuit
+import QACG.CircUtils.CircuitState
 import Control.Monad.State
 
-import CircGen.Bit.Toffoli
+import QACG.CircGen.Bit.Toffoli
 
 mcToff :: [String] -> String -> CircuitState ()
 mcToff conts targ = reduceCont conts []

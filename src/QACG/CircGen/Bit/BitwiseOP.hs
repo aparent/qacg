@@ -1,5 +1,5 @@
 -- | Contains out of place bitwise operations 
-module CircGen.Bit.BitwiseOP
+module QACG.CircGen.Bit.BitwiseOP
 ( bitwiseAND
   ,bitwiseOR
   ,bitwiseXOR
@@ -9,12 +9,12 @@ module CircGen.Bit.BitwiseOP
 
 ) where
 
-import CircUtils.Circuit
-import CircUtils.CircuitState
+import QACG.CircUtils.Circuit
+import QACG.CircUtils.CircuitState
 import Control.Monad.State
 import Control.Exception
 
-import CircGen.Bit.Toffoli
+import QACG.CircGen.Bit.Toffoli
 
 bitwise :: (String -> String -> String -> CircuitState ()) -> [String] -> [String] -> [String] ->  CircuitState ()
 bitwise f a b c = assert (length a == length b && length a == length c) $ go a b c 

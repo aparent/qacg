@@ -1,9 +1,9 @@
-module CircGen.Bit.Shift
+module QACG.CircGen.Bit.Shift
 ( contShift
   ,applyContShift
 ) where
 
-import CircUtils.Circuit
+import QACG.CircUtils.Circuit
 
 contShift :: Int -> Circuit 
 contShift n = Circuit shiftLines (applyContShift "ctrl" $ tail slines) []

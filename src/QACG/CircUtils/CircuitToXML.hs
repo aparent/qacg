@@ -1,11 +1,16 @@
-
-module CircUtils.CircuitToXML( 
-  circToXML 
+module QACG.CircUtils.CircuitToXML( 
+  writeCircuitXML 
 ) where
 
 import Text.XML.HXT.Core
-import CircUtils.Circuit
+import QACG.CircUtils.Circuit
 import Data.List
+
+-- | takes a filname and a circuit and writes the circuit in XML format 
+writeCircuitXML :: String -> Circuit -> IO()
+writeCircuitXML fname circ  = 
+  do _ <- runX ( circToXML fname circ )
+     return() 
 
 circToXML :: String -> Circuit -> IOSArrow XmlTree XmlTree
 circToXML pName circ = root [] [makeXMLProg pName circ]                    

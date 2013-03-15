@@ -1,4 +1,4 @@
-module CircUtils.CircuitState 
+module QACG.CircUtils.CircuitState 
 (
   CircuitState
   ,getConst
@@ -13,7 +13,7 @@ module CircUtils.CircuitState
 ) where
 
 
-import CircUtils.Circuit
+import QACG.CircUtils.Circuit
 import Control.Monad.State
 
 --For karatsuba stuff

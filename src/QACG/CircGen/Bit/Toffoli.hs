@@ -1,11 +1,11 @@
-module CircGen.Bit.Toffoli
+module QACG.CircGen.Bit.Toffoli
 ( tof
   ,tofMatchedD1
   ,leftTof
   ,rightTof
 ) where
 
-import CircUtils.CircuitState
+import QACG.CircUtils.CircuitState
 import Control.Exception(assert)
 
 tof :: String -> String -> String -> CircuitState () 

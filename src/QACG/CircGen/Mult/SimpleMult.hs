@@ -1,15 +1,15 @@
-module CircGen.Mult.SimpleMult
+module QACG.CircGen.Mult.SimpleMult
 ( simpleMult
   ,mkSimpleMult
 ) where
 
 
-import CircUtils.Circuit
-import CircUtils.CircuitState
+import QACG.CircUtils.Circuit
+import QACG.CircUtils.CircuitState
 import Control.Monad.State
 
-import CircGen.Add.SimpleRipple
-import CircGen.Bit.Toffoli
+import QACG.CircGen.Add.SimpleRipple
+import QACG.CircGen.Bit.Toffoli
 
 import Control.Exception(assert)
 -- | Generates a simple addition based multiplication circuit 
