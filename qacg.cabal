@@ -1,5 +1,11 @@
 Name:                QACG
-Version:             0.1
+-- The package version.  See the Haskell package versioning policy (PVP) 
+-- for standards guiding when and how versions should be incremented.
+-- http://www.haskell.org/haskellwiki/Package_versioning_policy
+-- PVP summary:      +-+------- breaking API changes
+--                   | | +----- non-breaking API additions
+--                   | | | +--- code changes with no API change
+version:             0.1.0.0
 Description:         Quantum Arithmetic Circuit Generation
 license:             BSD3
 License-file:        LICENSE
