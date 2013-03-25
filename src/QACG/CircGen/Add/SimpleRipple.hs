@@ -2,6 +2,7 @@ module QACG.CircGen.Add.SimpleRipple
 ( simpleRipple
  ,simpleCtrlRipple
  ,mkSimpleRipple
+ ,mkSimpleSubtract
  ,mkSimpleCtrlRipple
  ,simpleSubtract
 ) where
@@ -23,6 +24,15 @@ mkSimpleRipple aLns bLns carry = circ
                             _ <- initLines bLns
                             _ <- initLines [carry]
                             setOutputs $ aOut ++ bOut ++ [carry]
+
+mkSimpleSubtract :: [String] -> [String] -> Circuit
+mkSimpleSubtract aLns bLns = circ
+  where (_,(_,_,circ)) = runState go ([], ['c':show x|x<-[0..10]] , Circuit (LineInfo [] [] [] []) [] [])
+        go             = do (aOut,bOut) <- simpleSubtract aLns bLns 
+                            _ <- initLines aLns
+                            _ <- initLines bLns
+                            setOutputs $ aOut ++ bOut
+
 
 mkSimpleCtrlRipple :: String -> [String] -> [String] -> String -> Circuit
 mkSimpleCtrlRipple ctrl aLns bLns carry = circ

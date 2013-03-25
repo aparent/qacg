@@ -21,6 +21,7 @@ main = do
   case cName of
     "adderUnsignedInPlaceCarry"        ->  writeCircuit (dir++cName)  $ simpleRippleSize size
     "adderUnsignedInPlaceCarryControl" ->  writeCircuit (dir++cName)  $ simpleCtrlRippleSize size
+    "subtractUnsignedInPlace"          ->  writeCircuit (dir++cName)  $ subtractUnsignedInPlace size --not in list fix this
     "multUnsignedOutOfPlace"           ->  writeCircuit (dir++cName)  $ simpleMultSize size
     --"divUnsignedOutOfPlace"            ->  writeCircuit (dir++cName)  $ divUnsignedOutOfPlace size
     "greaterOutOfPlace"                ->  writeCircuit (dir++cName)  $ greaterOutOfPlace size
@@ -30,14 +31,15 @@ main = do
     "orOutOfPlace"                     ->  writeCircuit (dir++cName)  $ orOutOfPlace size
     "xorOutOfPlace"                    ->  writeCircuit (dir++cName)  $ xorOutOfPlace size
     _ -> putStrLn $ "No generator for " ++ cName
-  where simpleRippleSize n = mkSimpleRipple (var 'a' n) (var 'b' n) "z"
+  where simpleRippleSize n     = mkSimpleRipple (var 'a' n) (var 'b' n) "z"
+        subtractUnsignedInPlace n = mkSimpleSubtract (var 'a' n) (var 'b' n)
         simpleCtrlRippleSize n = mkSimpleCtrlRipple "control" (var 'a' n) (var 'b' n) "z"
-        simpleMultSize n = mkSimpleMult (var 'a' n) (var 'b' n)
-        andOutOfPlace n =  mkBitwiseAND (var 'a' n) (var 'b' n) (var 'z' n)
-        orOutOfPlace  n =  mkBitwiseOR  (var 'a' n) (var 'b' n) (var 'z' n)
-        xorOutOfPlace n =  mkBitwiseXOR (var 'a' n) (var 'b' n) (var 'z' n)
-        greaterOutOfPlace n = mkRippleComp (var 'a' n) (var 'b' n) "z"
-        equalOutOfPlace n = mkEqual (var 'a' n) (var 'b' n) "targ"
+        simpleMultSize n       = mkSimpleMult (var 'a' n) (var 'b' n)
+        andOutOfPlace n        = mkBitwiseAND (var 'a' n) (var 'b' n) (var 'z' n)
+        orOutOfPlace  n        = mkBitwiseOR  (var 'a' n) (var 'b' n) (var 'z' n)
+        xorOutOfPlace n        = mkBitwiseXOR (var 'a' n) (var 'b' n) (var 'z' n)
+        greaterOutOfPlace n    = mkRippleComp (var 'a' n) (var 'b' n) "z"
+        equalOutOfPlace n      = mkEqual (var 'a' n) (var 'b' n) "targ"
         -- divUnsignedOutOfPlace n =  genSimpleInt n --Fix this circuit up
         var vName n = [ vName:show x | x<-[0..n-1] ] 
 
