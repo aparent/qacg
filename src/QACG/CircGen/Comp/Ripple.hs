@@ -1,41 +1,50 @@
 -- | Comparison circuit from <http://arxiv.org/abs/quant-ph/0410184>
-module CircGen.Comp.Ripple
-( genRipple
+module QACG.CircGen.Comp.Ripple
+( rippleComp
+  ,mkRippleComp
 ) where
 
-import Data.List
-import CircUtils.Circuit
+import QACG.CircUtils.Circuit
+import QACG.CircUtils.CircuitState
+import Control.Monad.State
+import Control.Exception(assert)
+import Debug.Trace
 
-genRipple :: Int -> Circuit 
-genRipple n = (Circuit { line_info = cLines n, gates = cGates n, subcircuits= []})
+import QACG.CircGen.Bit.Toffoli
 
-cLines :: Int -> Line_Info 
-cLines n = 
-  Line_Info { vars = cVars
-  , inputs = cInputs
-  , outputs = cOutputs 
-  , output_labels = cOutLab }
-  where cInputs = [ x++y | x <- ["a","b"] , y <- map show [0..(n-1)]]
-        cOutputs = "c" : cInputs ++ ["res"]
-        cOutLab = "0" : cInputs ++ ["res"]
-        cVars = cOutputs
+-- The comparison is simply done by reverse computing an addition circuit until the carry bit is determined
+-- Then undoing the computation.  If the carry bit is set then the first input is greater then the second 
 
-cGates :: Int -> [Gate]
-cGates n = start ++ middle ++ reverse start
-  where middle = [cnot ("a"++show (n-1)) "res", tof ("a"++show (n-2)) ("b"++show (n-1)) "res"]
-        start = nots ++ cnots ++ begin ++ ripple
-          where nots = map (\x-> Gate "tof" ["a"++show x]) [0..(n-1)]
-                cnots = map (\x-> cnot ("a"++show x) ("b"++show x)) [1..(n-1)]
-                begin = [cnot "a1" "c"
-                         ,tof "b0" "a0" "c"
-                         ,cnot "a2" "a1"
-                         ,tof "c" "b1" "a1"]
-                ripple = concatMap cnotLevel [1..(n-3)] 
-                  where cnotLevel x = [ cnot ("a"++show(x+2)) ("a"++show (x+1)),
-                                        tof ("a"++show x) ("b"++show (x+1))("a"++show (x+1))]
+rippleComp :: [String] -> [String] -> String -> CircuitState ([String], [String])
+rippleComp a b carry = assert (trace ("rip("++(show.length) a++","++(show.length) b++")") $ length a == length b) $ do
+  cs <- getConst 1
+  applyRippleComp (head cs:a) b carry
+  freeConst [head cs]
+  return (a, b ++ [carry])
+    where applyRippleComp (a0:[]) [] z = cnot a0 z 
+          applyRippleComp (a0:a1:as) (b0:bs) z
+            = do uma    a0 b0 a1 
+                 applyRippleComp (a1:as) bs z
+                 umaInv a0 b0 a1
+          applyRippleComp _ _ _ = assert False $ return () --Should never happen!
 
-cnot :: String -> String -> Gate
-cnot a b = Gate "tof" [a,b]
+mkRippleComp :: [String] -> [String] -> String -> Circuit
+mkRippleComp aLns bLns carry = circ
+  where (_,(_,_,circ)) = runState go ([], ['c':show x|x<-[0..10]] , Circuit (LineInfo [] [] [] []) [] [])
+        go             = do (aOut,bOut) <- rippleComp aLns bLns carry
+                            _ <- initLines aLns
+                            _ <- initLines bLns
+                            _ <- initLines [carry]
+                            setOutputs $ aOut ++ bOut ++ [carry]
 
-tof :: String -> String -> String -> Gate
-tof a b c = Gate "tof" [ a , b, c]
+uma :: String -> String -> String -> CircuitState () 
+uma x y z  
+  = do rightTof x y z
+       cnot z x
+       cnot x y
+
+umaInv :: String -> String -> String -> CircuitState () 
+umaInv x y z  
+  = do cnot x y
+       cnot z x
+       rightTof x y z

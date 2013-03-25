@@ -1,15 +1,15 @@
-module CircGen.Bit.Shift
+module QACG.CircGen.Bit.Equal
 ( equal
   ,mkEqual
 ) where
 
-import CircUtils.Circuit
-import CircUtils.CircuitState
+import QACG.CircUtils.Circuit
+import QACG.CircUtils.CircuitState
 import Control.Monad.State
-import CircGen.Bit.MCToff
 import Control.Exception
 
-import CircGen.Bit.Toffoli
+import QACG.CircGen.Bit.MCToff
+import QACG.CircGen.Bit.Toffoli
 
 equal :: [String] -> [String] -> String -> CircuitState ()
 equal x y targ = assert (length x == length y) $ go x y

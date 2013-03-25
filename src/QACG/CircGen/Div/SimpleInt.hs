@@ -1,14 +1,14 @@
 -- | A reversible cicuit for integer division
-module CircGen.Div.SimpleInt
+module QACG.CircGen.Div.SimpleInt
 ( genSimpleInt
 ) where
 
 import Data.List
 import CircUtils.Circuit
 
-import CircGen.Add.RippleSub
-import CircGen.Comp.Ripple
-import CircGen.Bit.LeftShift
+import QACG.CircGen.Add.RippleSub
+import QACG.CircGen.Comp.Ripple
+import QACG.CircGen.Bit.Shift
 
 genSimpleInt :: Int -> Circuit 
 genSimpleInt n = Circuit { line_info = cLines n, gates = cGates n 0, subcircuits= cSubs n}
