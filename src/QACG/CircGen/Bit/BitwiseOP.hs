@@ -1,9 +1,11 @@
 -- | Contains out of place bitwise operations 
 module QACG.CircGen.Bit.BitwiseOP
 ( bitwiseAND
+  ,bitwiseNAND
   ,bitwiseOR
   ,bitwiseXOR
   ,mkBitwiseAND
+  ,mkBitwiseNAND
   ,mkBitwiseOR
   ,mkBitwiseXOR
 
@@ -23,6 +25,13 @@ bitwise f a b c = assert (length a == length b && length a == length c) $ go a b
         go [] [] [] = return ()
         go _ _ _ = assert False $ return () --Should never happen!
 
+bitNAND :: String -> String -> String -> CircuitState ()  
+bitNAND a b c = do notgate a 
+                   notgate b
+                   tof a b c 
+                   notgate a
+                   notgate b
+
 bitAND :: String -> String -> String -> CircuitState ()  
 bitAND = tof 
 
@@ -36,6 +45,9 @@ bitXOR a b c = do cnot a c
                   cnot b c 
 bitwiseAND :: [String] -> [String] -> [String] ->  CircuitState ()
 bitwiseAND = bitwise bitAND
+
+bitwiseNAND :: [String] -> [String] -> [String] ->  CircuitState ()
+bitwiseNAND = bitwise bitNAND
 
 bitwiseOR :: [String] -> [String] -> [String] ->  CircuitState ()
 bitwiseOR = bitwise bitOR
@@ -55,6 +67,9 @@ mkBitwise f a b c = circ
 
 mkBitwiseAND :: [String] -> [String] -> [String] -> Circuit
 mkBitwiseAND = mkBitwise bitwiseAND
+
+mkBitwiseNAND :: [String] -> [String] -> [String] -> Circuit
+mkBitwiseNAND = mkBitwise bitwiseNAND
 
 mkBitwiseOR :: [String] -> [String] -> [String] -> Circuit
 mkBitwiseOR = mkBitwise bitwiseOR
