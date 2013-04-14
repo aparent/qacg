@@ -39,7 +39,7 @@ main = do
     "xorOutOfPlace"                    ->  writeCircuit (dir++cName) $ xorOutOfPlace size
     "xorInPlace"                       ->  notImplemented cName
     "nandOutOfPlace"                   ->  writeCircuit (dir++cName) $ nandOutOfPlace size
-    "norOutOfPlace"                    ->  notImplemented cName
+    "norOutOfPlace"                    ->  writeCircuit (dir++cName) $ norOutOfPlace size
     -- Relational Ops
     "equalOutOfPlace"                  ->  writeCircuit (dir++cName) $ equalOutOfPlace size
     "notEqualOutOfPlace"               ->  notImplemented cName
@@ -55,6 +55,7 @@ main = do
         andOutOfPlace n                 = mkBitwiseAND  (var 'a' n) (var 'b' n) (var 'z' n)
         nandOutOfPlace n                = mkBitwiseNAND (var 'a' n) (var 'b' n) (var 'z' n)
         orOutOfPlace  n                 = mkBitwiseOR   (var 'a' n) (var 'b' n) (var 'z' n)
+        norOutOfPlace  n                = mkBitwiseNOR   (var 'a' n) (var 'b' n) (var 'z' n)
         xorOutOfPlace n                 = mkBitwiseXOR  (var 'a' n) (var 'b' n) (var 'z' n)
         lessOutOfPlace n                = mkLessOutOfPlace  (var 'a' n) (var 'b' n) "z"
         greaterOutOfPlace n             = mkGreaterOutOfPlace  (var 'a' n) (var 'b' n) "z"

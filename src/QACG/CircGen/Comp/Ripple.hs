@@ -33,7 +33,8 @@ rippleComp a b carry = assert (trace ("rip("++(show.length) a++","++(show.length
 
 
 
-greaterThan,greaterThanOrEqual,lessThan,lessThanOrEqual :: [String] -> [String] -> String -> CircuitState ()
+greaterThan,greaterThanOrEqual,lessThan,lessThanOrEqual 
+    :: [String] -> [String] -> String -> CircuitState ()
 greaterThan = rippleComp
 greaterThanOrEqual a b c = do rippleComp b a c
                               notgate c 
@@ -41,7 +42,8 @@ lessThan a b c = rippleComp b a c
 lessThanOrEqual a b c = do rippleComp a b c 
                            notgate c
 
-mkLessOutOfPlace,mkGreaterOutOfPlace,mkLessThanOrEqualOutOfPlace,mkGreaterThenOrEqualOutOfPlace :: [String] -> [String] -> String -> Circuit
+mkLessOutOfPlace,mkGreaterOutOfPlace,mkLessThanOrEqualOutOfPlace,mkGreaterThenOrEqualOutOfPlace 
+    :: [String] -> [String] -> String -> Circuit
 mkLessOutOfPlace = mkComp lessThan
 mkGreaterOutOfPlace = mkComp greaterThan 
 mkLessThanOrEqualOutOfPlace = mkComp lessThanOrEqual 

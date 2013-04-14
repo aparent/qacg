@@ -3,10 +3,12 @@ module QACG.CircGen.Bit.BitwiseOP
 ( bitwiseAND
   ,bitwiseNAND
   ,bitwiseOR
+  ,bitwiseNOR
   ,bitwiseXOR
   ,mkBitwiseAND
   ,mkBitwiseNAND
   ,mkBitwiseOR
+  ,mkBitwiseNOR
   ,mkBitwiseXOR
 
 ) where
@@ -25,34 +27,25 @@ bitwise f a b c = assert (length a == length b && length a == length c) $ go a b
         go [] [] [] = return ()
         go _ _ _ = assert False $ return () --Should never happen!
 
-bitNAND :: String -> String -> String -> CircuitState ()  
-bitNAND a b c = do notgate a 
-                   notgate b
-                   tof a b c 
-                   notgate a
-                   notgate b
-
-bitAND :: String -> String -> String -> CircuitState ()  
+bitNAND,bitAND,bitOR,bitNOR,bitXOR 
+  :: String -> String -> String -> CircuitState ()  
 bitAND = tof 
-
-bitOR :: String -> String -> String -> CircuitState ()  
+bitNAND a b c = do bitAND a b c 
+                   notgate c
 bitOR a b c = do tof a b c
                  cnot a c
                  cnot b c
-
-bitXOR :: String -> String -> String -> CircuitState ()  
+bitNOR a b c = do bitOR a b c
+                  notgate c
 bitXOR a b c = do cnot a c
                   cnot b c 
-bitwiseAND :: [String] -> [String] -> [String] ->  CircuitState ()
+
+bitwiseAND,bitwiseNAND,bitwiseOR,bitwiseNOR,bitwiseXOR 
+    :: [String] -> [String] -> [String] ->  CircuitState ()
 bitwiseAND = bitwise bitAND
-
-bitwiseNAND :: [String] -> [String] -> [String] ->  CircuitState ()
 bitwiseNAND = bitwise bitNAND
-
-bitwiseOR :: [String] -> [String] -> [String] ->  CircuitState ()
 bitwiseOR = bitwise bitOR
-
-bitwiseXOR :: [String] -> [String] -> [String] ->  CircuitState ()
+bitwiseNOR = bitwise bitNOR
 bitwiseXOR = bitwise bitXOR
 
 mkBitwise:: ([String] -> [String] -> [String] ->  CircuitState ()) ->  [String] -> [String] -> [String] -> Circuit
@@ -65,14 +58,10 @@ mkBitwise f a b c = circ
                             setOutputs $ a ++ b ++ c
 
 
-mkBitwiseAND :: [String] -> [String] -> [String] -> Circuit
+mkBitwiseAND,mkBitwiseNAND,mkBitwiseOR,mkBitwiseNOR,mkBitwiseXOR
+    :: [String] -> [String] -> [String] -> Circuit
 mkBitwiseAND = mkBitwise bitwiseAND
-
-mkBitwiseNAND :: [String] -> [String] -> [String] -> Circuit
 mkBitwiseNAND = mkBitwise bitwiseNAND
-
-mkBitwiseOR :: [String] -> [String] -> [String] -> Circuit
 mkBitwiseOR = mkBitwise bitwiseOR
-
-mkBitwiseXOR :: [String] -> [String] -> [String] -> Circuit
+mkBitwiseNOR = mkBitwise bitwiseNOR
 mkBitwiseXOR = mkBitwise bitwiseXOR
