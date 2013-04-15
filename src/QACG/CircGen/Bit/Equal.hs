@@ -1,6 +1,7 @@
 module QACG.CircGen.Bit.Equal
 ( equal
-  ,mkEqual
+  ,mkEqualOutOfPlace
+  ,mkNotEqualOutOfPlace
 ) where
 
 import QACG.CircUtils.Circuit
@@ -23,12 +24,20 @@ equal x y targ = assert (length x == length y) $ go x y
                               applyNots ls
         applyNots [] = return ()
 
-mkEqual :: [String]-> [String] -> String -> Circuit
-mkEqual a b targ = circ
+notEqual x y targ = do equal x y targ 
+                       notgate targ
+
+mkEq :: ([String] -> [String] -> String -> CircuitState ()) -> [String]-> [String] -> String -> Circuit
+mkEq f a b targ = circ
   where (_,(_,_,circ)) = runState go ([], map (\x->'c':show x) [0..(3 * length a)] , Circuit (LineInfo [] [] [] []) [] [])
         go             = do as <- initLines a
                             bs <- initLines b
                             t <- initLines [targ]
-                            equal a b (head t)
+                            f a b (head t)
                             setOutputs $ as ++ bs ++ t
 
+mkEqualOutOfPlace, mkNotEqualOutOfPlace
+    :: [String]-> [String] -> String -> Circuit
+
+mkEqualOutOfPlace = mkEq equal
+mkNotEqualOutOfPlace = mkEq notEqual

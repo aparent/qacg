@@ -42,7 +42,7 @@ main = do
     "norOutOfPlace"                    ->  writeCircuit (dir++cName) $ norOutOfPlace size
     -- Relational Ops
     "equalOutOfPlace"                  ->  writeCircuit (dir++cName) $ equalOutOfPlace size
-    "notEqualOutOfPlace"               ->  notImplemented cName
+    "notEqualOutOfPlace"               ->  writeCircuit (dir++cName) $ notEqualOutOfPlace size
     "lessOutOfPlace"                   ->  writeCircuit (dir++cName) $ lessOutOfPlace size
     "greaterOutOfPlace"                ->  writeCircuit (dir++cName) $ greaterOutOfPlace size
     "lessThanOrEqualOutOfPlace"        ->  writeCircuit (dir++cName) $ lessThanOrEqualOutOfPlace size
@@ -61,7 +61,8 @@ main = do
         greaterOutOfPlace n             = mkGreaterOutOfPlace  (var 'a' n) (var 'b' n) "z"
         lessThanOrEqualOutOfPlace n     = mkLessThanOrEqualOutOfPlace  (var 'a' n) (var 'b' n) "z"
         greaterThenOrEqualOutOfPlace n  = mkGreaterThenOrEqualOutOfPlace  (var 'a' n) (var 'b' n) "z"
-        equalOutOfPlace n               = mkEqual (var 'a' n) (var 'b' n) "targ"
+        equalOutOfPlace n               = mkEqualOutOfPlace (var 'a' n) (var 'b' n) "targ"
+        notEqualOutOfPlace n            = mkNotEqualOutOfPlace (var 'a' n) (var 'b' n) "targ"
         -- divUnsignedOutOfPlace n =  genSimpleInt n --Fix this circuit up
         var vName n = [ vName:show x | x<-[0..n-1] ] 
         notImplemented nm = putStrLn $ nm ++ " is not yet implemented."
