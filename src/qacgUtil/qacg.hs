@@ -1,4 +1,5 @@
 import System.Environment
+import System.Cmd
 
 import QACG.CircUtils.Circuit
 import QACG.CircUtils.CircuitToXML
@@ -67,8 +68,11 @@ main = do
         var vName n = [ vName:show x | x<-[0..n-1] ] 
         notImplemented nm = putStrLn $ nm ++ " is not yet implemented."
 
-writeCircuit :: String-> Circuit -> IO()
-writeCircuit fname circ = 
-  do writeFile (fname++".qc") (show circ)
-     writeCircuitXML fname circ
-     return() 
+writeCircuit :: String -> Circuit -> IO()
+writeCircuit fname circ = do 
+    writeFile qcname $ show circ
+    _ <- system $ "cat " ++ qcname ++ " | ./tpar > " ++ qcname ++ ".opt" 
+    writeCircuitXML fname circ
+    return() 
+    where qcname = fname ++ ".qc"
+ 

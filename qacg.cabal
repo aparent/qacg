@@ -27,6 +27,6 @@ Library
 Executable qacg
   hs-source-dirs:    src/qacgUtil
   Main-is:           qacg.hs
-  Build-Depends:     base, directory, mtl, hxt, QACG
+  Build-Depends:     base, directory, mtl, hxt, process, QACG
   hs-source-dirs:    src/
   ghc-options:       -Wall

@@ -41,6 +41,7 @@ mkSimpleCtrlRipple ctrl aLns bLns carry = circ
                             _ <- initLines aLns
                             _ <- initLines bLns
                             _ <- initLines [carry]
+                            _ <- initLines [ctrl]
                             setOutputs $ aOut ++ bOut ++ [carry]
 
 maj :: String -> String -> String -> CircuitState () 
