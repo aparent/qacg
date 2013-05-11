@@ -27,29 +27,30 @@ makeXMLProg cname c = program $ makeXMLCirc cname c : map (\(x,y) -> makeXMLCirc
      
 makeXMLCirc  :: ArrowXml a => String -> Circuit -> a XmlTree XmlTree
 makeXMLCirc procName circ = proceedure $ map mkGate $ gates circ
-    where qVars = intercalate "," $ vars $ lineInfo circ  
-          proceedure a =  mkelem "procedure" [ 
-                              sattr "name" procName,
-                              sattr "static" "", 
-                              sattr "quantum" qVars
-                            ] 
-                            [ mkelem "body" [] a ]
-          mkGate g = mkelem "control" [] $ controls ++ [body]
-            where controls = map mkControl (tail$reverse$lineNames g)
-                  body = selem "body" [
-                           selem "statement" [
-                             selem "operator" [ 
-                               txt$name g
-                             ], 
-                             selem "arguments" [ 
-                               selem "variable" [
-                                 txt (head$reverse$lineNames g)
-                               ]
-                             ]
-                           ]
-                         ]
-                  mkControl x = selem "control" [ 
-                                  selem "variable" [ 
+  where qVars = intercalate "," $ vars $ lineInfo circ  
+        proceedure a =  mkelem "procedure" [ 
+                            sattr "name" procName,
+                            sattr "static" "", 
+                            sattr "quantum" qVars
+                          ] 
+                          [ mkelem "body" [] a ]
+        mkGate g = mkelem "control" [] $ controls ++ [body]
+          where controls = map mkControl (tail$reverse$lineNames g)
+                body =  selem "body" [
+                          selem "statement" [
+                            selem "operator" [ 
+                              txt$name g
+                            ], 
+                            selem "arguments" [ 
+                              selem "variable" [
+                                  txt (head$reverse$lineNames g)
+                                ]
+                              ]
+                            ]
+                          ]
+                mkControl x = selem "control" [ 
+                                selem "variable" [ 
                                     txt x 
                                   ]
                                 ] 
+

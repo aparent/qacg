@@ -10,7 +10,6 @@ import Control.Monad.State
 import Control.Exception
 
 import QACG.CircGen.Bit.MCToff
-import QACG.CircGen.Bit.Toffoli
 
 equal :: [String] -> [String] -> String -> CircuitState ()
 equal x y targ = assert (length x == length y) $ go x y
@@ -20,10 +19,12 @@ equal x y targ = assert (length x == length y) $ go x y
         go [] [] = do applyNots y 
                       mcToff y targ
                       applyNots y
+        go _ _ = assert False $ return () --Should never happen!
         applyNots (l:ls) = do notgate l
                               applyNots ls
         applyNots [] = return ()
 
+notEqual :: [String] -> [String] -> String -> CircuitState ()
 notEqual x y targ = do equal x y targ 
                        notgate targ
 

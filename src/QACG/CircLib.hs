@@ -8,7 +8,7 @@ import System.Exit
 main = do  
   args <- getArgs
   case getOpt RequireOrder options args of
-    (flags, [],      [])     -> print $ flags
+    (flags, [],      [])     -> print flags
     (_,     nonOpts, [])     -> error $ "unrecognized arguments: " ++ unwords nonOpts
     (_,     _,       msgs)   -> error $ concat msgs ++ usageInfo header options
 
@@ -20,8 +20,8 @@ data Flag
 
 options :: [OptDescr Flag] 
 options = [ 
-    Option ['o'] ["output"] (ReqArg Output "FILE") "specify out file", 
-    Option ['V'] ["version"] (NoArg Version) "shows the version number" 
+    Option "o" ["output"] (ReqArg Output "FILE") "specify out file", 
+    Option "V" ["version"] (NoArg Version) "shows the version number" 
   ]
 
 header = "Usage: CircLib [OPTION...]"

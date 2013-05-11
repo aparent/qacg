@@ -50,7 +50,7 @@ bitwiseXOR = bitwise bitXOR
 
 mkBitwise:: ([String] -> [String] -> [String] ->  CircuitState ()) ->  [String] -> [String] -> [String] -> Circuit
 mkBitwise f a b c = circ
-  where (_,(_,_,circ)) = runState go ([],  ['c':show x | x <- [0 .. 4]], Circuit (LineInfo [] [] [] []) [] [])
+  where (_,(_,_,circ)) = runState go ([],  ['c':show x | x <- [0::Int .. 4]], Circuit (LineInfo [] [] [] []) [] [])
         go             = do _ <- initLines a
                             _ <- initLines b 
                             _ <- initLines c

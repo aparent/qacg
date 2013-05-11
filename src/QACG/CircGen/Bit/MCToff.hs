@@ -24,7 +24,7 @@ mcToff conts targ = reduceCont conts []
 mkMcToff:: [String] -> String -> Circuit
 mkMcToff controls target = circ
   where (_,(_,_,circ)) = runState go ([], ['c':show x | x <- [0 .. (2*length controls)]], Circuit (LineInfo [] [] [] []) [] [])
-        go             = do initLines controls
+        go             = do _ <- initLines controls
                             mcToff controls target
-                            initLines [target]
+                            _ <- initLines [target]
                             setOutputs $ controls ++ [target]

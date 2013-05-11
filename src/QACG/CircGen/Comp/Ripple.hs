@@ -51,7 +51,7 @@ mkGreaterThenOrEqualOutOfPlace = mkComp greaterThanOrEqual
 
 mkComp :: ([String] -> [String] -> String -> CircuitState ()) -> [String] -> [String] -> String -> Circuit
 mkComp comp aLns bLns carry = circ
-  where (_,(_,_,circ)) = runState go ([], ['c':show x|x<-[0..10]] , Circuit (LineInfo [] [] [] []) [] [])
+  where (_,(_,_,circ)) = runState go ([], ['c':show x|x<-[0::Int .. 10]] , Circuit (LineInfo [] [] [] []) [] [])
         go             = do comp aLns bLns carry
                             _ <- initLines aLns
                             _ <- initLines bLns

@@ -22,7 +22,7 @@ Library
   Exposed-modules:   QACG.CircUtils.Circuit, QACG.CircUtils.CircuitToXML
                      ,QACG.CircGen.Mult.SimpleMult, QACG.CircGen.Add.SimpleRipple
                      ,QACG.CircGen.Bit.Shift, QACG.CircGen.Bit.BitwiseOP
-  ghc-options:       -Wall
+  ghc-options:       -Wall -Werror
 
 Executable qacg
   hs-source-dirs:    src/qacgUtil
