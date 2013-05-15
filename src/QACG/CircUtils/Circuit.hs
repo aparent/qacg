@@ -67,5 +67,14 @@ writeGates = concatMap writeGate
 writeGate :: Gate -> String
 writeGate Gate{name=n,lineNames=l} = n ++ " " ++ unwords l ++ "\n"
 
+numGate :: Circuit -> String -> Int
+numGate c s = numGate' $ gates c
+  where numGate' (g:gs) = if name g == s 
+                            then 1 + numGate' gs
+                            else 0 + numGate' gs
+        numGate' [] = 0 
+
 circuitAnnotations :: Circuit -> [(String,String)]
-circuitAnnotations _ = [("countT","0"), ("countCNOT","1"),("depthT","2")]
+circuitAnnotations c = [("countT",numT), ("countCNOT",numCNOT)]--("depthT","0")
+  where numT = show $ numGate c "T" + numGate c "T*"
+        numCNOT = show $ numGate c "TOF"
