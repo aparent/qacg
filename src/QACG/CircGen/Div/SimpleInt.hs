@@ -48,4 +48,4 @@ remainder n = [ x++y | x <- ["R"] , y <- map show [0..(n-1)]]
 
 
 cnot :: String -> String -> Gate
-cnot a b = Gate "tof" [a,b]
+cnot a b = Gate "TOF" [a,b]

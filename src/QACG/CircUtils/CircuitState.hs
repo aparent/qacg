@@ -58,7 +58,7 @@ tgateInv :: String -> CircuitState ()
 tgateInv x = appendGate "T*" [x] 
 
 cnot :: String -> String -> CircuitState ()
-cnot c t = appendGate "tof" [c,t]
+cnot c t = appendGate "TOF" [c,t]
 
 notgate :: String -> CircuitState ()
-notgate x = appendGate "tof" [x]
+notgate x = appendGate "TOF" [x]

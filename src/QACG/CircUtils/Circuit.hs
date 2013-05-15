@@ -5,6 +5,7 @@ module QACG.CircUtils.Circuit
   ,writeQc
   ,addLines
   ,addGates
+  ,circuitAnnotations
 ) where
 
 import Data.List
@@ -65,3 +66,6 @@ writeGates = concatMap writeGate
 
 writeGate :: Gate -> String
 writeGate Gate{name=n,lineNames=l} = n ++ " " ++ unwords l ++ "\n"
+
+circuitAnnotations :: Circuit -> [(String,String)]
+circuitAnnotations _ = [("countT","0"), ("countCNOT","1"),("depthT","2")]
