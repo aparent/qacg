@@ -75,6 +75,8 @@ numGate c s = numGate' $ gates c
         numGate' [] = 0 
 
 circuitAnnotations :: Circuit -> [(String,String)]
-circuitAnnotations c = [("countT",numT), ("countCNOT",numCNOT)]--("depthT","0")
-  where numT = show $ numGate c "T" + numGate c "T*"
-        numCNOT = show $ numGate c "TOF"
+circuitAnnotations c = [("countT",show numT), ("countCNOT",show numCNOT),("width_max",show widthMax),("width_delta",show widthDelta)]--("depthT","0")
+  where numT = numGate c "T" + numGate c "T*"
+        numCNOT = numGate c "TOF"
+        widthMax = length $ vars $ lineInfo $ c
+        widthDelta = widthMax - (length$inputs$lineInfo$c)
