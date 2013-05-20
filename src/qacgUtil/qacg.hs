@@ -23,7 +23,7 @@ main = do
     -- Arithmetic Ops
     "adderUnsignedInPlaceCarry"        ->  writeCircuit (dir++cName) $ simpleRippleSize size
     "adderUnsignedInPlaceCarryControl" ->  writeCircuit (dir++cName) $ simpleCtrlRippleSize size
-    "adderUnsignedInPlaceModulus"      ->  notImplemented cName
+    "adderUnsignedInPlaceModulus"      ->  writeCircuit (dir++cName) $ adderUnsignedInPlaceModulus size
     "adderUnsignedOutOfPlaceModulus"   ->  notImplemented cName
     "subtractUnsignedInPlace"          ->  writeCircuit (dir++cName) $ subtractUnsignedInPlace size --not in list fix this
     "subtractUnsignedInPlaceModulus"   ->  notImplemented cName
@@ -50,6 +50,7 @@ main = do
     "greaterThenOrEqualOutOfPlace"     ->  writeCircuit (dir++cName) $ greaterThenOrEqualOutOfPlace size
     _ -> putStrLn $ "No generator for " ++ cName
   where simpleRippleSize n              = mkSimpleRipple (var 'a' n) (var 'b' n) "z"
+        adderUnsignedInPlaceModulus n   = mkSimpleModRipple (var 'a' n) (var 'b' n)
         subtractUnsignedInPlace n       = mkSimpleSubtract (var 'a' n) (var 'b' n)
         simpleCtrlRippleSize n          = mkSimpleCtrlRipple "control" (var 'a' n) (var 'b' n) "z"
         simpleMultSize n                = mkSimpleMult  (var 'a' n) (var 'b' n)

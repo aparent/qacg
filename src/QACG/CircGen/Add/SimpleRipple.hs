@@ -2,6 +2,7 @@ module QACG.CircGen.Add.SimpleRipple
 ( simpleRipple
  ,simpleCtrlRipple
  ,mkSimpleRipple
+ ,mkSimpleModRipple
  ,mkSimpleSubtract
  ,mkSimpleCtrlRipple
  ,simpleSubtract
@@ -24,6 +25,15 @@ mkSimpleRipple aLns bLns carry = circ
                             _ <- initLines bLns
                             _ <- initLines [carry]
                             setOutputs $ aOut ++ bOut ++ [carry]
+
+mkSimpleModRipple :: [String] -> [String] -> Circuit
+mkSimpleModRipple aLns bLns = circ
+  where (_,(_,_,circ)) = runState go ([], ['c':show x|x<-[0::Int .. 10]] , Circuit (LineInfo [] [] [] []) [] [])
+        go             = do (aOut,bOut) <- simpleModRipple aLns bLns
+                            _ <- initLines aLns
+                            _ <- initLines bLns
+                            setOutputs $ aOut ++ bOut
+
 
 mkSimpleSubtract :: [String] -> [String] -> Circuit
 mkSimpleSubtract aLns bLns = circ
@@ -55,6 +65,21 @@ uma x y z
   = do rightTof x y z
        cnot z x
        cnot x y
+
+simpleModRipple :: [String] -> [String] -> CircuitState ([String], [String])
+simpleModRipple a b = assert (trace ("rip("++(show.length) a++","++(show.length) b++")") $ length a == length b) $ do
+  cs <- getConst 1
+  applyRipple (head cs:a) b
+  freeConst [head cs]
+  return (a, b)
+    where applyRipple (a0:a1:[]) (b0:[]) 
+            = do cnot a1 b0 
+                 cnot a0 b0
+          applyRipple (a0:a1:as) (b0:bs) 
+            = do maj a0 b0 a1 
+                 applyRipple (a1:as) bs 
+                 uma a0 b0 a1
+          applyRipple _ _ = assert False $ return () --Should never happen!
 
 simpleRipple :: [String] -> [String] -> String -> CircuitState ([String], [String])
 simpleRipple a b carry = assert (trace ("rip("++(show.length) a++","++(show.length) b++")") $ length a == length b) $ do
