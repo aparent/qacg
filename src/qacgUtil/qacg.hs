@@ -72,7 +72,7 @@ main = do
 writeCircuit :: String -> Circuit -> IO()
 writeCircuit fname circ = do 
     writeFile qcname $ show circ
-    _ <- system $ "cat " ++ qcname ++ " | ./tpar > " ++ qcname ++ ".opt" 
+    _ <- system $ "cat " ++ qcname ++ " | tpar > " ++ fname ++ ".opt.qc" 
     writeCircuitXML fname circ
     return() 
     where qcname = fname ++ ".qc"
