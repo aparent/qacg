@@ -67,6 +67,18 @@ writeGates = concatMap writeGate
 writeGate :: Gate -> String
 writeGate Gate{name=n,lineNames=l} = n ++ " " ++ unwords l ++ "\n"
 
+tDepth :: Circuit -> Int
+tDepth c = countT $ map name $ gates c
+  where countT ("T":gs)  = 1 + skipT gs
+        countT ("T*":gs) = 1 + skipT gs
+        countT (_:gs)    = 0 + countT gs
+        countT []    = 0
+        skipT ("T":gs)  = 0 + skipT gs
+        skipT ("T*":gs) = 0 + skipT gs
+        skipT (_:gs)    = 0 + countT gs
+        skipT []    = 0
+
+
 numGate :: Circuit -> String -> Int
 numGate c s = numGate' $ gates c
   where numGate' (g:gs) = if name g == s 
@@ -79,9 +91,11 @@ circuitAnnotations c = [("countT",show numT)
                        ,("countCNOT",show numCNOT)
                        ,("countH", show numH)
                        ,("width_max",show widthMax)
-                       ,("width_delta",show widthDelta)]--("depthT","0")
+                       ,("depthT",show depthT)
+                       ,("width_delta",show widthDelta)]
   where numT = numGate c "T" + numGate c "T*"
         numCNOT = numGate c "TOF"
         numH = numGate c "H"
         widthMax = length $ vars $ lineInfo $ c
         widthDelta = widthMax - (length$inputs$lineInfo$c)
+        depthT = tDepth c
