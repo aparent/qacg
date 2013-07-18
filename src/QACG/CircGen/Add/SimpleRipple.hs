@@ -6,6 +6,7 @@ module QACG.CircGen.Add.SimpleRipple
  ,mkSimpleSubtract
  ,mkSimpleCtrlRipple
  ,simpleSubtract
+ ,simpleCtrlSub
 ) where
 
 import QACG.CircUtils.Circuit
@@ -53,6 +54,24 @@ mkSimpleCtrlRipple ctrl aLns bLns carry = circ
                             _ <- initLines [carry]
                             _ <- initLines [ctrl]
                             setOutputs $ aOut ++ bOut ++ [carry]
+
+
+-- |Used to pad inputs that need to be equal length.  
+-- In the case of these adders the a input is returned and the result is stored in b.
+-- This means that padding bits may be freed in the case where they are added to a but not b
+padInputs :: [String] -> [String] -> ([String]->[String]->CircuitState a) -> CircuitState (([String],[String]) , a)
+padInputs a b f 
+  | length a > length b  = do padding <- getConst $ length a - length b  
+                              r <- f a (b++padding)         
+                              return ((a,b),r)
+  | length a < length b  = do padding <- getConst $ length b - length a
+                              r <- f (a++padding) b 
+                              freeConst padding
+                              return ((a,b),r)
+  | otherwise            = do r <- f a b 
+                              return ((a,b),r)
+
+
 
 maj :: String -> String -> String -> CircuitState () 
 maj x y z 
@@ -112,12 +131,33 @@ simpleCtrlRipple ctrl a b carry = assert (trace ("RipCon("++(show.length) a++","
   cs <- getConst 1
   applyRippleC (head cs:a) b carry
   freeConst [head cs]
-  return (a, b )
+  return (a, b++[carry])
     where applyRippleC (a0:[]) [] z = cnot a0 z 
           applyRippleC (a0:a1:as) (b0:bs) z
             = do majC a0 b0 a1 
                  applyRippleC (a1:as) bs z
                  umaC a0 b0 a1
+          applyRippleC _ _ _ = assert False $ return () --Should never happen!
+          majC x y z  
+            = do tof ctrl z y
+                 cnot z x
+                 tof x y z
+          umaC x y z  
+            = do tof x y z
+                 cnot z x
+                 tof ctrl x y
+
+simpleCtrlSub :: String -> [String] -> [String] -> String -> CircuitState ([String], [String])
+simpleCtrlSub ctrl a b carry = assert (trace ("RipCon("++(show.length) a++","++(show.length) b++")") $ length a == length b) $ do
+  cs <- getConst 1
+  applyRippleC (head cs:a) b carry
+  freeConst [head cs]
+  return (a, b )
+    where applyRippleC (a0:[]) [] z = cnot a0 z 
+          applyRippleC (a0:a1:as) (b0:bs) z
+            = do umaC a0 b0 a1 
+                 applyRippleC (a1:as) bs z
+                 majC a0 b0 a1
           applyRippleC _ _ _ = assert False $ return () --Should never happen!
           majC x y z  
             = do tof ctrl z y
