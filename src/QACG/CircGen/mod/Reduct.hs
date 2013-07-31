@@ -12,6 +12,7 @@ import Debug.Trace
 import QACG.CircGen.Comp.Ripple
 import QACG.CircGen.Add.SimpleRipple(simpleCtrlSub)
 import QACG.CircGen.Mult.SimpleMult(simpleMult)
+import CircGen.Misc(setNum)
 
 modAddReduct :: Int -> [String] -> CircuitState (String)  
 modAddReduct N a = do NBits <- getConst $ ceiling $ logBase 2 N
@@ -22,13 +23,6 @@ modAddReduct N a = do NBits <- getConst $ ceiling $ logBase 2 N
                       setNum N NBits
                       freeConst NBits 
                       return anc
-
-setNum :: Int -> [String] -> CircuitState () 
-setNum N [] = return () 
-setNum N (a:as) 
-  | N `mod` 2 == 1 = do not a 
-                        setNum (N `div` 2) as
-  | otherwise      = setNum (N `div` 2) as 
 
 ctrlSetNum :: Int -> [String] -> String -> CircuitState () --Sets the num if control bit is high or else sets 1 
 ctrlSetNum N [] = return () 
