@@ -1,18 +1,18 @@
-module CircGen.Misc
+module QACG.CircGen.Misc
 ( applyCopy
  ,applyMux
  ,setNum
 ) where
 
-import CircUtils.Circuit
+import QACG.CircUtils.Circuit
 import QACG.CircUtils.CircuitState
 
 setNum :: Int -> [String] -> CircuitState () 
-setNum N [] = return () 
-setNum N (a:as) 
-  | N `mod` 2 == 1 = do notgate a 
-                        setNum (N `div` 2) as
-  | otherwise      = setNum (N `div` 2) as 
+setNum n [] = return () 
+setNum n (a:as) 
+  | n `mod` 2 == 1 = do notgate a 
+                        setNum (n `div` 2) as
+  | otherwise      = setNum (n `div` 2) as 
 
 
 
