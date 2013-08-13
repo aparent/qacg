@@ -20,7 +20,7 @@ import QACG.CircGen.Bit.Toffoli
 -- |Generates the addition circuit in <http://arxiv.org/abs/quant-ph/0410184> and returns it as a circuit
 mkSimpleRipple :: [String] -> [String] -> String -> Circuit
 mkSimpleRipple aLns bLns carry = circ
-  where (_,(_,_,circ)) = runState go ([], ['c':show x|x<-[0::Int .. 10]] , Circuit (LineInfo [] [] [] []) [] [])
+  where (_,_,circ) = execState go ([], ['c':show x|x<-[0::Int .. 10]] , Circuit (LineInfo [] [] [] []) [] [])
         go             = do (aOut,bOut) <- simpleRipple aLns bLns carry
                             _ <- initLines aLns
                             _ <- initLines bLns
@@ -29,7 +29,7 @@ mkSimpleRipple aLns bLns carry = circ
 
 mkSimpleModRipple :: [String] -> [String] -> Circuit
 mkSimpleModRipple aLns bLns = circ
-  where (_,(_,_,circ)) = runState go ([], ['c':show x|x<-[0::Int .. 10]] , Circuit (LineInfo [] [] [] []) [] [])
+  where (_,_,circ) = execState go ([], ['c':show x|x<-[0::Int .. 10]] , Circuit (LineInfo [] [] [] []) [] [])
         go             = do (aOut,bOut) <- simpleModRipple aLns bLns
                             _ <- initLines aLns
                             _ <- initLines bLns
@@ -38,7 +38,7 @@ mkSimpleModRipple aLns bLns = circ
 
 mkSimpleSubtract :: [String] -> [String] -> Circuit
 mkSimpleSubtract aLns bLns = circ
-  where (_,(_,_,circ)) = runState go ([], ['c':show x|x<-[0::Int .. 10]] , Circuit (LineInfo [] [] [] []) [] [])
+  where (_,_,circ) = execState go ([], ['c':show x|x<-[0::Int .. 10]] , Circuit (LineInfo [] [] [] []) [] [])
         go             = do (aOut,bOut) <- simpleSubtract aLns bLns 
                             _ <- initLines aLns
                             _ <- initLines bLns
@@ -47,7 +47,7 @@ mkSimpleSubtract aLns bLns = circ
 
 mkSimpleCtrlRipple :: String -> [String] -> [String] -> String -> Circuit
 mkSimpleCtrlRipple ctrl aLns bLns carry = circ
-  where (_,(_,_,circ)) = runState go ([], ['c':show x|x<-[0::Int .. 10]] , Circuit (LineInfo [] [] [] []) [] [])
+  where (_,_,circ) = execState go ([], ['c':show x|x<-[0::Int .. 10]] , Circuit (LineInfo [] [] [] []) [] [])
         go             = do (aOut,bOut) <- simpleCtrlRipple ctrl aLns bLns carry
                             _ <- initLines aLns
                             _ <- initLines bLns
