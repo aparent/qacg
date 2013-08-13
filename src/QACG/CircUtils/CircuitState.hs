@@ -15,8 +15,6 @@ module QACG.CircUtils.CircuitState
 
 import QACG.CircUtils.Circuit
 import Control.Monad.State
-
---For karatsuba stuff
 import Data.List((\\)) 
 
 --(ConstInUse,ConstAvail,circ)

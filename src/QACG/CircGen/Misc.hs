@@ -1,9 +1,19 @@
-module CircGen.Misc
+module QACG.CircGen.Misc
 ( applyCopy
  ,applyMux
+ ,setNum
 ) where
 
-import CircUtils.Circuit
+import QACG.CircUtils.Circuit
+import QACG.CircUtils.CircuitState
+
+setNum :: Int -> [String] -> CircuitState () 
+setNum n [] = return () 
+setNum n (a:as) 
+  | n `mod` 2 == 1 = do notgate a 
+                        setNum (n `div` 2) as
+  | otherwise      = setNum (n `div` 2) as 
+
 
 
 applyCopy :: [String] -> [String] -> [Gate]
@@ -15,3 +25,4 @@ applyMux :: String -> [String] -> [String] -> [Gate]
 applyMux _ [] _          = [] 
 applyMux _ _ []          = [] 
 applyMux ctrl (a:as) (b:bs) = Gate "SWAP" [ctrl, a,b] : applyMux ctrl as bs  
+
