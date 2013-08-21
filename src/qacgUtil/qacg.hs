@@ -11,6 +11,7 @@ import QACG.CircGen.Bit.Shift
 import QACG.CircGen.Bit.BitwiseOP
 import QACG.CircGen.Bit.Equal
 import QACG.CircGen.Comp.Ripple
+import QACG.CircGen.Cordic
 
 --usage: qacg <directory> <circuitName> <size>
 main :: IO()
@@ -48,6 +49,9 @@ main = do
     "greaterOutOfPlace"                ->  writeCircuit (dir++cName) $ greaterOutOfPlace size
     "lessThanOrEqualOutOfPlace"        ->  writeCircuit (dir++cName) $ lessThanOrEqualOutOfPlace size
     "greaterThenOrEqualOutOfPlace"     ->  writeCircuit (dir++cName) $ greaterThenOrEqualOutOfPlace size
+    "sinCosSignedFixedpointOutOfPlace" ->  writeCircuit (dir++cName) $ sinCosSignedFixedpointOutOfPlace  size
+    "logConstBaseUnsignedFixedpointOutOfPlace" ->  writeCircuit (dir++cName) $ logConstBaseUnsignedFixedpointOutOfPlace   size
+    "sqrtUnsignedFixedpointOutOfPlace"  ->  writeCircuit (dir++cName) $ sqrtUnsignedFixedpointOutOfPlace size
     _ -> putStrLn $ "No generator for " ++ cName
   where simpleRippleSize n              = mkSimpleRipple (var 'a' n) (var 'b' n) "z"
         adderUnsignedInPlaceModulus n   = mkSimpleModRipple (var 'a' n) (var 'b' n)
@@ -67,6 +71,9 @@ main = do
         equalOutOfPlace n               = mkEqualOutOfPlace (var 'a' n) (var 'b' n) "targ"
         notEqualOutOfPlace n            = mkNotEqualOutOfPlace (var 'a' n) (var 'b' n) "targ"
         -- divUnsignedOutOfPlace n =  genSimpleInt n --Fix this circuit up
+        sinCosSignedFixedpointOutOfPlace n = mkCosSin n (var 'b' n)
+        logConstBaseUnsignedFixedpointOutOfPlace n = mkLog n (var 'b' n)
+        sqrtUnsignedFixedpointOutOfPlace n = mkSqrt n (var 'b' n)
         var vName n = [ vName:show x | x<-[0..n-1] ] 
         notImplemented nm = putStrLn $ nm ++ " is not yet implemented."
 

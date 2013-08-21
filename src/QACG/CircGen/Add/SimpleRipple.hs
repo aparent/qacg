@@ -1,5 +1,6 @@
 module QACG.CircGen.Add.SimpleRipple
 ( simpleRipple
+ ,simpleModRipple
  ,simpleCtrlRipple
  ,mkSimpleRipple
  ,mkSimpleModRipple
