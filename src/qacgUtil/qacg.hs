@@ -5,7 +5,7 @@ import QACG.CircUtils.Circuit
 import QACG.CircUtils.CircuitToXML
 
 import QACG.CircGen.Mult.SimpleMult
---import QACG.CircGen.Div.SimpleInt
+import QACG.CircGen.Div.SimpleInt
 import QACG.CircGen.Add.SimpleRipple
 import QACG.CircGen.Bit.Shift
 import QACG.CircGen.Bit.BitwiseOP
@@ -30,7 +30,7 @@ main = do
     "subtractUnsignedInPlaceModulus"   ->  notImplemented cName
     "multUnsignedOutOfPlace"           ->  writeCircuit (dir++cName) $ simpleMultSize size
     "multUnsignedOutOfPlaceModulus"    ->  notImplemented cName
-    "divUnsignedOutOfPlace"            ->  notImplemented cName
+    "divUnsignedOutOfPlace"            ->  writeCircuit (dir++cName) $ divUnsignedOutOfPlace size
     "modUnsignedOutOfPlace"            ->  notImplemented cName
     -- Bit Ops
     "shiftLeftControl"                 ->  writeCircuit (dir++cName) $ contShift size
@@ -74,6 +74,7 @@ main = do
         sinCosSignedFixedpointOutOfPlace n = mkCosSin n (var 'b' n)
         logConstBaseUnsignedFixedpointOutOfPlace n = mkLog n (var 'b' n)
         sqrtUnsignedFixedpointOutOfPlace n = mkSqrt n (var 'b' n)
+        divUnsignedOutOfPlace n = genSimpleInt n
         var vName n = [ vName:show x | x<-[0..n-1] ] 
         notImplemented nm = putStrLn $ nm ++ " is not yet implemented."
 

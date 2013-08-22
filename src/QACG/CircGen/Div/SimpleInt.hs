@@ -4,28 +4,29 @@ module QACG.CircGen.Div.SimpleInt
 ) where
 
 import Data.List
-import CircUtils.Circuit
+import QACG.CircUtils.Circuit
 
-import QACG.CircGen.Add.RippleSub
+import QACG.CircGen.Add.SimpleRipple
 import QACG.CircGen.Comp.Ripple
-import QACG.CircGen.Bit.Shift
 
 genSimpleInt :: Int -> Circuit 
-genSimpleInt n = Circuit { line_info = cLines n, gates = cGates n 0, subcircuits= cSubs n}
+genSimpleInt n = Circuit { lineInfo = cLines n, gates = cGates n 0, subcircuits= cSubs n}
 
+
+var vName n = [ vName:show x | x<-[0..n-1] ] 
 
 cSubs :: Int -> [(Circuit,String)]
 cSubs n = [subtract,shift,comp]
-  where subtract = (genRippleSub n, "SUB")
+  where subtract = (mkSimpleSubtract (var 'a' n) (var 'b' n), "SUB")
         shift = (genLeftShift (n-1), "SHIFT")
-        comp = ( genRipple n, "COMPARE")
+        comp = (mkGreaterOutOfPlace  (var 'a' n) (var 'b' n) "z", "COMPARE")
 
-cLines :: Int -> Line_Info 
+cLines :: Int -> LineInfo 
 cLines n = 
-  Line_Info { vars = cVars
+  LineInfo { vars = cVars
   , inputs = cInputs
   , outputs = cOutputs 
-  , output_labels = cOutLab }
+  , outputLabels = cOutLab }
   where cInputs = number n ++ divisor n
         cOutputs = cInputs ++ ["c"] ++ quotient n ++ remainder n ++ ["cComp"]
         cOutLab = cInputs ++ ["0"] ++quotient n ++ remainder n  ++ ["0"]
@@ -49,3 +50,23 @@ remainder n = [ x++y | x <- ["R"] , y <- map show [0..(n-1)]]
 
 cnot :: String -> String -> Gate
 cnot a b = Gate "TOF" [a,b]
+
+genLeftShift :: Int -> Circuit 
+genLeftShift n = (Circuit { lineInfo = shiftCLines n, gates = shiftCGates n, subcircuits= []})
+
+shiftCLines :: Int -> LineInfo 
+shiftCLines n = 
+  LineInfo { vars = cVars
+  , inputs = cInputs
+  , outputs = cOutputs 
+  , outputLabels = cOutLab }
+  where cInputs = zipWith (++) (repeat "b") (map show [0..(n-1)])
+        cOutputs = cInputs ++ ['b' : show n]
+        cOutLab = "0" : cInputs
+        cVars = cOutputs
+
+shiftCGates :: Int -> [Gate]
+shiftCGates 1 = [ cnotS 0 1 , cnotS 1 0 ]
+  where cnotS a b = Gate "tof" ["b" ++ show a , "b" ++ show b]
+shiftCGates n = [ cnotS (n-1) n , cnotS n (n-1)] ++ shiftCGates (n-1)
+  where cnotS a b = Gate "tof" ["b" ++ show a , "b" ++ show b]

@@ -13,7 +13,6 @@ import QACG.CircUtils.CircuitState
 import QACG.CircGen.Add.SimpleRipple(simpleModRipple)
 import QACG.CircGen.Misc(setNum)
 
-
 -- K(n) = \prod_{i=0}^{n-1} 1/\sqrt{1 + 2^{-2i}} 
 k :: Int -> Float
 k n = product [1 / sqrt (1+2**(-2*(fromIntegral i))) | i <- [0..n]]
@@ -23,25 +22,77 @@ toBin 0 = []
 toBin n = (mod n 2 == 1) : toBin (div n 2)
 
 mkLog:: Int -> [String] -> Circuit
-mkLog = mkCosSin
+mkLog iters v = circ {gates = gates circ ++ reverse (gates circ)}
+  where (_,(_,_,circ)) = runState go ([], ['c':show x|x<-[0::Int .. 100]] , Circuit (LineInfo [] [] [] []) [] [])
+        go             = do z <- getConst $ length v
+                            setNum 1 z
+                            sqrtOut <- cordicLog iters v z
+                            _ <- initLines v
+                            setOutputs $ sqrtOut
+
 
 mkSqrt:: Int -> [String] -> Circuit
-mkSqrt = mkCosSin
+mkSqrt iters v = circ {gates = gates circ ++ reverse (gates circ)}
+  where (_,(_,_,circ)) = runState go ([], ['c':show x|x<-[0::Int .. 100]] , Circuit (LineInfo [] [] [] []) [] [])
+        go             = do v1Init <- getConst $ length v
+                            v2Init <- getConst $ length v         
+                            z <- getConst $ length v
+                            c <- getConst $ length v         
+                            setNum (25*10^(length v - 3)) c
+                            (_,v1) <- simpleModRipple c v1Init
+                            invert c
+                            (_,v2) <- simpleModRipple c v2Init
+                            invert c
+                            setNum (25*10^(length v - 3)) c
+                            freeConst c 
+                            (sqrtOut,_) <- cordic iters v1 v2 z
+                            _ <- initLines v
+                            setOutputs $ sqrtOut
+
+
 
 mkCosSin:: Int -> [String] -> Circuit
 mkCosSin iters beta = circ {gates = gates circ ++ reverse (gates circ)}
   where (_,(_,_,circ)) = runState go ([], ['c':show x|x<-[0::Int .. 100]] , Circuit (LineInfo [] [] [] []) [] [])
-        go             = do (cosOut,sinOut) <- cordic iters beta
+        go             = do v1Init <- getConst $ length beta
+                            v2Init <- getConst $ length beta         
+                            invert v1Init
+                            (cosOut,sinOut) <- cordic iters v1Init v2Init beta
                             _ <- initLines beta
                             setOutputs $ cosOut ++ sinOut
 
+cordicLog :: Int -> [String] -> [String] -> CircuitState [String]
+cordicLog iters xInit vInit = iteration 0 xInit vInit
+  where iteration :: Int -> [String] -> [String] -> CircuitState [String]
+        iteration n x z  
+          | n < iters = do sign <- getSign x 
+                           zC <- copy z
+                           cInvert sign z
+                           c <- getConst n
+                           (_,z') <- simpleModRipple (drop n zC ++ c) z 
+                           freeConst c
+                           x' <- updateAng sign x n
+                           iteration (n+1) x' z'
+          | otherwise = return z
+        getSign b = do  cs <- getConst 1
+                        cnot (last b) (head cs)
+                        return (head cs)  
+        updateAng s a iter = do c <- getConst $ length a
+                                setNum (floor $ logs (fromIntegral iter)*10^length a) c 
+                                invert c
+                                cInvert s c
+                                (_,a') <- simpleModRipple c a 
+                                cInvert s c
+                                invert c
+                                setNum (floor $ logs (fromIntegral iter)*10^length a) c 
+                                freeConst c
+                                return a'
+        logs n = log (2**(-n))
+ 
 
 -- Computes sin and cos for an angle 'beta' where -pi/2 < beta < pi/2
-cordic :: Int -> [String] -> CircuitState ([String],[String])
-cordic iters beta = do v1Init <- getConst $ length beta
-                       v2Init <- getConst $ length beta
-                       invert v1Init
-                       iteration 0 v1Init v2Init beta
+cordic :: Int -> [String] -> [String] -> [String] -> CircuitState ([String],[String])
+cordic iters v1Init v2Init beta = iteration 0 v1Init v2Init beta
   where iteration :: Int -> [String] -> [String] -> [String] -> CircuitState ([String],[String])
         iteration n v1 v2 ang 
           | n < iters = do sign <- getSign ang 
